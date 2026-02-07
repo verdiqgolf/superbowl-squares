@@ -56,14 +56,16 @@ input{font-family:inherit;outline:none}
 .num-cell.assigned{color:var(--text);font-weight:700}
 .corner-cell{background:transparent}
 .grid-cell{display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:4px;cursor:pointer;transition:all .15s;font-size:clamp(8px,1.6vw,12px);font-weight:500;color:var(--muted);text-align:center;overflow:hidden;padding:1px;line-height:1.1}
-.grid-cell:hover:not(.claimed){background:var(--bg4)}
+.grid-cell:hover:not(.claimed):not(.maxed){background:var(--bg4)}
 .grid-cell.claimed{background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--text)}
 .grid-cell.yours{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green)}
 .grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 12px rgba(251,191,36,.1)}
+.grid-cell.maxed{cursor:not-allowed;opacity:.5}
 
-.stats{display:flex;gap:16px;justify-content:center;margin-top:16px;font-size:13px;color:var(--muted)}
+.stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:16px;font-size:13px;color:var(--muted)}
 .stats span{background:var(--bg2);padding:6px 14px;border-radius:8px;border:1px solid var(--border)}
 .stats .count{color:var(--text);font-weight:600}
+.stats .at-limit{color:var(--gold)}
 
 .admin-section{max-width:500px;margin:0 auto 40px;padding:0 16px}
 .admin-toggle{display:flex;justify-content:center;margin-bottom:12px}
@@ -73,9 +75,9 @@ input{font-family:inherit;outline:none}
 .admin-panel.open{display:block}
 .admin-panel h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px}
 .admin-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.admin-row label{font-size:13px;color:var(--muted);min-width:70px}
+.admin-row label{font-size:13px;color:var(--muted);min-width:120px}
 .admin-row input{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;width:140px}
-.admin-row input[type="number"]{width:70px}
+.admin-row input[type="number"]{width:80px}
 .btn-admin{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#2563EB}
 .btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:#F59E0B}
@@ -172,7 +174,7 @@ function getLogoHTML(teamName) {
 let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
 let state = {
-  config: { team1: DEFAULT_TEAM1, team2: DEFAULT_TEAM2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
+  config: { team1: DEFAULT_TEAM1, team2: DEFAULT_TEAM2, numbersAssigned: false, colNumbers: null, rowNumbers: null, maxPerPlayer: 0 },
   scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
   squares: {}
 };
@@ -194,6 +196,7 @@ function setupListeners() {
         state.config.colNumbers = Object.values(state.config.colNumbers);
       if (state.config.rowNumbers && !Array.isArray(state.config.rowNumbers))
         state.config.rowNumbers = Object.values(state.config.rowNumbers);
+      if (state.config.maxPerPlayer === undefined) state.config.maxPerPlayer = 0;
     }
     render();
   });
@@ -208,9 +211,23 @@ function setupListeners() {
   });
 }
 
+function getPlayerCount(name) {
+  return Object.values(state.squares).filter(v => v === name).length;
+}
+
+function isAtLimit() {
+  const max = state.config.maxPerPlayer;
+  if (!max || max <= 0) return false;
+  return getPlayerCount(player) >= max;
+}
+
 function claimSquare(row, col) {
   const key = `r${row}c${col}`;
   if (state.squares[key]) return;
+  if (isAtLimit()) {
+    showToast(`You've reached the limit of ${state.config.maxPerPlayer} squares!`, 'error');
+    return;
+  }
   db.ref(`game/squares/${key}`).transaction(current => {
     if (current) return;
     return player;
@@ -252,11 +269,18 @@ function saveTeams() {
   showToast('Teams updated!', 'success');
 }
 
+function saveMaxPerPlayer() {
+  const val = parseInt(document.getElementById('edit_max_per_player').value);
+  const max = isNaN(val) || val < 0 ? 0 : val;
+  db.ref('game/config/maxPerPlayer').set(max);
+  showToast(max > 0 ? `Limit set to ${max} per player` : 'No limit set', 'success');
+}
+
 function resetGame() {
   if (!confirm('Reset EVERYTHING?')) return;
   if (!confirm('Are you really sure?')) return;
   db.ref('game').set({
-    config: { team1: state.config.team1, team2: state.config.team2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
+    config: { team1: state.config.team1, team2: state.config.team2, numbersAssigned: false, colNumbers: null, rowNumbers: null, maxPerPlayer: state.config.maxPerPlayer },
     scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
     squares: {}
   });
@@ -295,7 +319,9 @@ function renderSignIn() {
 function renderGame() {
   const { team1, team2 } = state.config;
   const claimed = Object.keys(state.squares).length;
-  const yourCount = Object.values(state.squares).filter(v => v === player).length;
+  const yourCount = getPlayerCount(player);
+  const max = state.config.maxPerPlayer;
+  const atLimit = isAtLimit();
   const winners = {};
   ['q1','q2','q3','q4'].forEach(q => { winners[q] = getWinner(q); });
   const winnerCells = new Set();
@@ -336,8 +362,9 @@ function renderGame() {
       if (isWin) cls += ' winner';
       else if (isYours) cls += ' yours';
       else if (owner) cls += ' claimed';
-      const clickAttr = owner ? '' : `onclick="claimSquare(${r},${c})"`;
-      gridHTML += `<div class="${cls}" ${clickAttr} title="${owner || 'Open'}">${owner || ''}</div>`;
+      else if (atLimit) cls += ' maxed';
+      const clickAttr = (owner || atLimit) ? '' : `onclick="claimSquare(${r},${c})"`;
+      gridHTML += `<div class="${cls}" ${clickAttr} title="${owner || (atLimit ? 'At limit' : 'Open')}">${owner || ''}</div>`;
     }
   }
 
@@ -353,6 +380,12 @@ function renderGame() {
   });
 
   const isAdmin = player === ADMIN_NAME;
+
+  // Your squares counter text
+  let yourLabel = `You: <span class="count">${yourCount}</span>`;
+  if (max > 0) {
+    yourLabel = `You: <span class="count ${atLimit ? 'at-limit' : ''}">${yourCount}/${max}</span>`;
+  }
 
   return `
     <div class="header">
@@ -374,7 +407,7 @@ function renderGame() {
 
     <div class="stats">
       <span><span class="count">${claimed}</span>/100 claimed</span>
-      <span>You: <span class="count">${yourCount}</span></span>
+      <span>${yourLabel}</span>
     </div>
 
     <div class="legend">
@@ -394,6 +427,14 @@ function renderGame() {
         <div class="admin-row"><label>Team 1:</label><input type="text" id="edit_team1" value="${team1}" maxlength="30"></div>
         <div class="admin-row"><label>Team 2:</label><input type="text" id="edit_team2" value="${team2}" maxlength="30"></div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button></div>
+        <hr class="admin-divider">
+        <h3>🎯 Square Limits</h3>
+        <div class="admin-row">
+          <label>Max per player:</label>
+          <input type="number" id="edit_max_per_player" value="${max || ''}" min="0" max="100" placeholder="0 = no limit">
+          <button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button>
+        </div>
+        <p class="admin-msg">${max > 0 ? `Each player can claim up to ${max} squares.` : 'No limit — players can claim unlimited squares.'}</p>
         <hr class="admin-divider">
         <div class="admin-row">
           <button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>
