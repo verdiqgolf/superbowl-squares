@@ -177,7 +177,6 @@ function setupListeners() {
 function claimSquare(row, col) {
   const key = `r${row}c${col}`;
   if (state.squares[key]) return;
-  if (!confirm(`Claim square (row ${row+1}, col ${col+1})?`)) return;
   db.ref(`game/squares/${key}`).transaction(current => {
     if (current) return;
     return player;
