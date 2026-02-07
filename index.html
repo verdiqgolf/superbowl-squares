@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Super Bowl Squares</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -12,121 +12,167 @@
   --bg:#0B1120;--bg2:#141C2F;--bg3:#1C2540;--bg4:#253050;
   --border:#2A3450;--accent:#3B82F6;--green:#10B981;--gold:#FBBF24;
   --red:#EF4444;--text:#F1F5F9;--muted:#8492A6;--dim:#4A5568;
-  --cell-size:clamp(32px,8vw,56px);
-  --num-size:clamp(24px,5vw,40px);
+  --cell-size:clamp(28px,8vw,56px);
+  --num-size:clamp(20px,5vw,40px);
 }
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input{font-family:inherit;outline:none}
 
-.signin-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-.signin-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:48px 40px;max-width:400px;width:100%;text-align:center}
-.signin-card h1{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;line-height:1;margin-bottom:4px}
-.signin-card .subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
-.signin-card input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;margin-bottom:16px;transition:border .2s}
+/* ── SIGN IN ── */
+.signin-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.signin-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px 28px;max-width:360px;width:100%;text-align:center}
+.signin-card h1{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;line-height:1;margin-bottom:4px}
+.signin-card .subtitle{color:var(--muted);font-size:14px;margin-bottom:28px}
+.signin-card input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;margin-bottom:14px;transition:border .2s}
 .signin-card input:focus{border-color:var(--accent)}
 .signin-card .btn-join{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;font-size:16px;font-weight:600;transition:background .2s}
 .signin-card .btn-join:hover{background:#2563EB}
-.emoji-football{font-size:56px;margin-bottom:16px;display:block}
+.emoji-football{font-size:48px;margin-bottom:12px;display:block}
 
-.header{text-align:center;padding:24px 16px 0}
-.header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,52px);letter-spacing:3px;line-height:1}
-.header .user-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;font-size:14px;color:var(--muted)}
+/* ── HEADER ── */
+.header{text-align:center;padding:16px 12px 0}
+.header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,52px);letter-spacing:3px;line-height:1}
+.header .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
 
-.scoreboard{max-width:600px;margin:20px auto;padding:0 16px}
-.score-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;font-size:clamp(13px,2.5vw,15px);border-bottom:1px solid var(--border)}
+/* ── SCOREBOARD ── */
+.scoreboard{max-width:600px;margin:12px auto;padding:0 12px}
+.score-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 0;font-size:clamp(11px,2.5vw,15px);border-bottom:1px solid var(--border)}
 .score-row:last-child{border:none}
-.score-row .qlabel{width:40px;text-align:center;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
-.score-row .team{width:100px;font-weight:600;text-align:right}
+.score-row .qlabel{width:34px;text-align:center;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+.score-row .team{width:clamp(60px,18vw,100px);font-weight:600;text-align:right;font-size:clamp(11px,2.2vw,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .score-row .team.t2{text-align:left}
-.score-row .score-num{min-width:32px;text-align:center;font-weight:700;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)}
+.score-row .score-num{min-width:26px;text-align:center;font-weight:700;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)}
 .score-row.winner-row{background:rgba(251,191,36,.08);border-radius:8px}
-.score-row .winner-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
+.score-row .winner-badge{font-size:10px;color:var(--gold);font-weight:700;margin-left:2px;white-space:nowrap}
 
-/* ---- RULES PANEL ---- */
-.rules-section{max-width:600px;margin:0 auto;padding:0 16px}
-.rules-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:8px}
-.rules-card h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:12px;color:var(--accent)}
-.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;font-size:14px}
+/* ── COLLAPSIBLE ── */
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;-webkit-user-select:none;user-select:none;transition:border-radius .2s}
+.collapsible-header.is-open{border-radius:12px 12px 0 0}
+.collapsible-header h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--accent);margin:0}
+.collapsible-header .chevron{color:var(--muted);font-size:16px;transition:transform .25s}
+.collapsible-header .chevron.open{transform:rotate(180deg)}
+.collapsible-body{background:var(--bg2);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;max-height:0;transition:max-height .35s ease}
+.collapsible-body.open{max-height:3000px}
+.collapsible-inner{padding:14px 16px}
+
+/* ── RULES ── */
+.rules-section{max-width:600px;margin:8px auto;padding:0 12px}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:13px}
 .rules-grid .rl{color:var(--muted)}
 .rules-grid .rv{font-weight:600;text-align:right}
-.rules-grid .rv.gold{color:var(--gold)}
 .rules-grid .rv.green{color:var(--green)}
-.payout-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
-.payout-table th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;padding:6px 0;border-bottom:1px solid var(--border)}
-.payout-table td{padding:6px 0;border-bottom:1px solid rgba(42,52,80,.5)}
-.payout-table .amount{text-align:right;font-weight:700;color:var(--green)}
-.payout-table .winner-name{color:var(--gold);font-weight:600;font-size:13px}
-.payout-table .pending{color:var(--dim);font-style:italic;font-size:13px}
+.payout-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.payout-table th{text-align:left;color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;padding:4px 0;border-bottom:1px solid var(--border)}
+.payout-table th:nth-child(2){text-align:right}
+.payout-table td{padding:4px 0;border-bottom:1px solid rgba(42,52,80,.4);vertical-align:middle}
+.payout-table .amount{text-align:right;font-weight:700;color:var(--green);font-size:12px}
+.payout-table .winner-name{color:var(--gold);font-weight:600;font-size:11px}
+.payout-table .pending{color:var(--dim);font-style:italic;font-size:11px}
 
-.grid-section{display:flex;flex-direction:column;align-items:center;padding:12px 8px 32px}
-.grid-wrapper{display:inline-flex;flex-direction:column;align-items:center}
-.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding-left:calc(var(--num-size) + 8px)}
-.team-label-top img{height:clamp(24px,5vw,40px);width:auto;object-fit:contain}
+/* ── GRID ── */
+.grid-section{display:flex;flex-direction:column;align-items:center;padding:10px 4px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid-wrapper{display:inline-flex;flex-direction:column;align-items:center;min-width:min-content}
+.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(15px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding-left:calc(var(--num-size) + 6px)}
+.team-label-top img{height:clamp(18px,4.5vw,40px);width:auto;object-fit:contain}
 .grid-outer{display:flex;align-items:stretch}
-.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center;gap:10px;padding-top:calc(var(--num-size) + 4px)}
-.team-label-left img{height:clamp(24px,5vw,40px);width:auto;object-fit:contain;transform:rotate(90deg)}
+.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(15px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:3px;display:flex;align-items:center;justify-content:center;gap:6px;padding-top:calc(var(--num-size) + 4px)}
+.team-label-left img{height:clamp(18px,4.5vw,40px);width:auto;object-fit:contain;transform:rotate(90deg)}
 .grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
-.num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,2.5vw,20px);color:var(--muted);border-radius:4px}
+.num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,2.5vw,20px);color:var(--muted);border-radius:3px}
 .num-cell.assigned{color:var(--text);font-weight:700}
 .corner-cell{background:transparent}
-.grid-cell{display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:4px;cursor:pointer;transition:all .15s;font-size:clamp(8px,1.6vw,12px);font-weight:500;color:var(--muted);text-align:center;overflow:hidden;padding:1px;line-height:1.1}
+.grid-cell{display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:3px;cursor:pointer;transition:all .12s;font-size:clamp(7px,1.4vw,12px);font-weight:500;color:var(--muted);text-align:center;overflow:hidden;padding:1px;line-height:1.05;-webkit-tap-highlight-color:transparent}
 .grid-cell:hover:not(.claimed):not(.maxed){background:var(--bg4)}
+.grid-cell:active:not(.claimed):not(.maxed){background:var(--accent);transform:scale(.93)}
 .grid-cell.claimed{background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--text)}
 .grid-cell.yours{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green)}
-.grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 12px rgba(251,191,36,.1)}
+.grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 10px rgba(251,191,36,.08)}
 .grid-cell.maxed{cursor:not-allowed;opacity:.5}
 
-.stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:16px;font-size:13px;color:var(--muted)}
-.stats span{background:var(--bg2);padding:6px 14px;border-radius:8px;border:1px solid var(--border)}
+/* ── STATS & LEGEND ── */
+.stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.stats span{background:var(--bg2);padding:5px 10px;border-radius:8px;border:1px solid var(--border)}
 .stats .count{color:var(--text);font-weight:600}
 .stats .at-limit{color:var(--gold)}
-
-.admin-section{max-width:500px;margin:0 auto 40px;padding:0 16px}
-.admin-toggle{display:flex;justify-content:center;margin-bottom:12px}
-.admin-toggle button{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:8px 20px;border-radius:8px;font-size:13px;transition:all .2s}
-.admin-toggle button:hover{border-color:var(--accent);color:var(--text)}
-.admin-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;display:none}
-.admin-panel.open{display:block}
-.admin-panel h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px}
-.admin-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.admin-row label{font-size:13px;color:var(--muted);min-width:140px}
-.admin-row input{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;width:140px}
-.admin-row input[type="number"]{width:80px}
-.btn-admin{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s}
-.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#2563EB}
-.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:#F59E0B}
-.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#DC2626}
-.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#059669}
-.btn-admin:disabled{opacity:.4;cursor:not-allowed}
-.admin-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
-.admin-msg{font-size:12px;color:var(--muted);margin-top:4px}
-.score-inputs{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:12px}
-.score-inputs .ql{font-size:13px;font-weight:600;color:var(--muted)}
-.score-inputs input{padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;width:100%}
-.random-draws{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.draw-row{display:flex;align-items:center;gap:8px;font-size:13px}
-.draw-row .draw-label{min-width:50px;font-weight:600;color:var(--muted)}
-.draw-row .draw-winner{color:var(--gold);font-weight:600;min-width:100px}
-
-.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
-.legend-item{display:flex;align-items:center;gap:6px}
-.legend-swatch{width:14px;height:14px;border-radius:3px}
+.legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-swatch{width:12px;height:12px;border-radius:3px}
 .swatch-yours{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4)}
 .swatch-claimed{background:var(--bg3);border:1px solid var(--border)}
 .swatch-winner{background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4)}
 .swatch-open{background:var(--bg3);border:1px dashed var(--dim)}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none}
+/* ── CHAT ── */
+.chat-section{max-width:600px;margin:12px auto;padding:0 12px}
+.chat-messages{height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.chat-msg{font-size:13px;padding:6px 10px;border-radius:8px;background:var(--bg3);word-wrap:break-word;line-height:1.35}
+.chat-msg .chat-name{font-weight:700;color:var(--accent);margin-right:6px;font-size:12px}
+.chat-msg .chat-time{color:var(--dim);font-size:10px;float:right;margin-top:2px}
+.chat-msg.yours{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.12)}
+.chat-msg.yours .chat-name{color:var(--green)}
+.chat-msg.system{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);text-align:center;font-style:italic;font-size:12px;color:var(--gold)}
+.chat-input-row{display:flex;gap:6px}
+.chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px}
+.chat-input-row input:focus{border-color:var(--accent)}
+.chat-input-row button{padding:10px 18px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
+.chat-input-row button:active{background:#2563EB;transform:scale(.97)}
+.chat-empty{text-align:center;color:var(--dim);font-size:13px;padding:40px 0;font-style:italic}
+.chat-unread{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:8px}
+
+/* ── ADMIN ── */
+.admin-section{max-width:500px;margin:0 auto 40px;padding:0 12px}
+.admin-toggle{display:flex;justify-content:center;margin-bottom:12px}
+.admin-toggle button{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:8px 20px;border-radius:8px;font-size:13px;transition:all .2s}
+.admin-toggle button:hover{border-color:var(--accent);color:var(--text)}
+.admin-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;display:none}
+.admin-panel.open{display:block}
+.admin-panel h3{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin-bottom:10px}
+.admin-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.admin-row label{font-size:13px;color:var(--muted);min-width:110px}
+.admin-row input{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;width:110px}
+.admin-row input[type="number"]{width:70px}
+.btn-admin{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;transition:all .15s}
+.btn-admin:active{transform:scale(.96)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-gold{background:var(--gold);color:#000}
+.btn-danger{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-admin:disabled{opacity:.4;cursor:not-allowed}
+.admin-divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+.admin-msg{font-size:11px;color:var(--muted);margin-top:4px}
+.score-inputs{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:10px}
+.score-inputs .ql{font-size:12px;font-weight:600;color:var(--muted)}
+.score-inputs input{padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;width:100%}
+.random-draws{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.draw-row{display:flex;align-items:center;gap:6px;font-size:12px}
+.draw-row .draw-label{min-width:36px;font-weight:600;color:var(--muted)}
+.draw-row .draw-winner{color:var(--gold);font-weight:600;flex:1;min-width:60px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:var(--green);color:var(--green)}
 .toast.error{border-color:var(--red);color:var(--red)}
 
-@media(max-width:600px){
-  .signin-card{padding:32px 24px}
-  .grid-section{overflow-x:auto;align-items:flex-start;padding-left:4px}
-  .rules-grid{grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px}
+/* ── MOBILE ── */
+@media(max-width:480px){
+  :root{--cell-size:clamp(26px,8.2vw,34px);--num-size:clamp(18px,4.5vw,22px)}
+  .header{padding:12px 8px 0}
+  .header h1{font-size:26px;letter-spacing:2px}
+  .scoreboard{padding:0 8px;margin:10px auto}
+  .rules-section,.chat-section,.admin-section{padding:0 8px}
+  .collapsible-header{padding:10px 12px}
+  .collapsible-inner{padding:10px 12px}
+  .admin-panel{padding:14px}
+  .chat-messages{height:200px}
+  .grid-section{padding:8px 2px 12px}
+}
+@media(max-width:360px){
+  :root{--cell-size:25px;--num-size:17px}
+  .grid{gap:1px}
+  .grid-cell{font-size:6px;border-radius:2px}
 }
 </style>
 </head>
@@ -155,329 +201,315 @@ const ADMIN_NAME = "Sean";
 const RANDOM_PRIZE = 10;
 
 const TEAM_LOGOS = {
-  "Patriots":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png",
-  "Seahawks":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
-  "Chiefs":"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",
-  "Eagles":"https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
-  "49ers":"https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
-  "Ravens":"https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
-  "Lions":"https://a.espncdn.com/i/teamlogos/nfl/500/det.png",
-  "Cowboys":"https://a.espncdn.com/i/teamlogos/nfl/500/dal.png",
-  "Bills":"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png",
-  "Packers":"https://a.espncdn.com/i/teamlogos/nfl/500/gb.png",
-  "Dolphins":"https://a.espncdn.com/i/teamlogos/nfl/500/mia.png",
-  "Steelers":"https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
-  "Bengals":"https://a.espncdn.com/i/teamlogos/nfl/500/cin.png",
-  "Jets":"https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png",
-  "Giants":"https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png",
-  "Broncos":"https://a.espncdn.com/i/teamlogos/nfl/500/den.png",
-  "Raiders":"https://a.espncdn.com/i/teamlogos/nfl/500/lv.png",
-  "Chargers":"https://a.espncdn.com/i/teamlogos/nfl/500/lac.png",
-  "Rams":"https://a.espncdn.com/i/teamlogos/nfl/500/lar.png",
-  "Cardinals":"https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
-  "Texans":"https://a.espncdn.com/i/teamlogos/nfl/500/hou.png",
-  "Colts":"https://a.espncdn.com/i/teamlogos/nfl/500/ind.png",
-  "Titans":"https://a.espncdn.com/i/teamlogos/nfl/500/ten.png",
-  "Jaguars":"https://a.espncdn.com/i/teamlogos/nfl/500/jax.png",
-  "Browns":"https://a.espncdn.com/i/teamlogos/nfl/500/cle.png",
-  "Vikings":"https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
-  "Bears":"https://a.espncdn.com/i/teamlogos/nfl/500/chi.png",
-  "Saints":"https://a.espncdn.com/i/teamlogos/nfl/500/no.png",
-  "Falcons":"https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
-  "Buccaneers":"https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
-  "Panthers":"https://a.espncdn.com/i/teamlogos/nfl/500/car.png",
-  "Commanders":"https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png"
+  "Patriots":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png","Seahawks":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
+  "Chiefs":"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png","Eagles":"https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
+  "49ers":"https://a.espncdn.com/i/teamlogos/nfl/500/sf.png","Ravens":"https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
+  "Lions":"https://a.espncdn.com/i/teamlogos/nfl/500/det.png","Cowboys":"https://a.espncdn.com/i/teamlogos/nfl/500/dal.png",
+  "Bills":"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png","Packers":"https://a.espncdn.com/i/teamlogos/nfl/500/gb.png",
+  "Dolphins":"https://a.espncdn.com/i/teamlogos/nfl/500/mia.png","Steelers":"https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
+  "Bengals":"https://a.espncdn.com/i/teamlogos/nfl/500/cin.png","Jets":"https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png",
+  "Giants":"https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png","Broncos":"https://a.espncdn.com/i/teamlogos/nfl/500/den.png",
+  "Raiders":"https://a.espncdn.com/i/teamlogos/nfl/500/lv.png","Chargers":"https://a.espncdn.com/i/teamlogos/nfl/500/lac.png",
+  "Rams":"https://a.espncdn.com/i/teamlogos/nfl/500/lar.png","Cardinals":"https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
+  "Texans":"https://a.espncdn.com/i/teamlogos/nfl/500/hou.png","Colts":"https://a.espncdn.com/i/teamlogos/nfl/500/ind.png",
+  "Titans":"https://a.espncdn.com/i/teamlogos/nfl/500/ten.png","Jaguars":"https://a.espncdn.com/i/teamlogos/nfl/500/jax.png",
+  "Browns":"https://a.espncdn.com/i/teamlogos/nfl/500/cle.png","Vikings":"https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
+  "Bears":"https://a.espncdn.com/i/teamlogos/nfl/500/chi.png","Saints":"https://a.espncdn.com/i/teamlogos/nfl/500/no.png",
+  "Falcons":"https://a.espncdn.com/i/teamlogos/nfl/500/atl.png","Buccaneers":"https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
+  "Panthers":"https://a.espncdn.com/i/teamlogos/nfl/500/car.png","Commanders":"https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png"
 };
 
 function getLogoHTML(t){const u=TEAM_LOGOS[t];return u?`<img src="${u}" alt="${t}">`:''}
 
 let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
+let rulesOpen = false;
+let chatOpen = true;
+let chatMessages = [];
+let lastChatCount = 0;
+let unreadCount = 0;
+
 let state = {
-  config: { team1:DEFAULT_TEAM1, team2:DEFAULT_TEAM2, numbersAssigned:false, colNumbers:null, rowNumbers:null, maxPerPlayer:0, numParticipants:0, costPerPerson:0 },
-  scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
-  squares: {},
-  randomWinners: { q1:null, q2:null, q3:null, q4:null }
+  config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0},
+  scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
+  squares:{},
+  randomWinners:{q1:null,q2:null,q3:null,q4:null}
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 
-function initGame() {
-  db.ref('game/config').once('value', snap => {
-    if (!snap.exists()) db.ref('game/config').set(state.config);
-  });
+function initGame(){
+  db.ref('game/config').once('value',s=>{if(!s.exists())db.ref('game/config').set(state.config)});
 }
 
-function setupListeners() {
-  db.ref('game/config').on('value', snap => {
-    if (snap.exists()) {
-      state.config = { ...state.config, ...snap.val() };
-      if (state.config.colNumbers && !Array.isArray(state.config.colNumbers))
-        state.config.colNumbers = Object.values(state.config.colNumbers);
-      if (state.config.rowNumbers && !Array.isArray(state.config.rowNumbers))
-        state.config.rowNumbers = Object.values(state.config.rowNumbers);
+function setupListeners(){
+  db.ref('game/config').on('value',s=>{
+    if(s.exists()){
+      state.config={...state.config,...s.val()};
+      if(state.config.colNumbers&&!Array.isArray(state.config.colNumbers))state.config.colNumbers=Object.values(state.config.colNumbers);
+      if(state.config.rowNumbers&&!Array.isArray(state.config.rowNumbers))state.config.rowNumbers=Object.values(state.config.rowNumbers);
     }
     render();
   });
-  db.ref('game/scores').on('value', snap => {
-    if (snap.exists()) state.scores = { ...state.scores, ...snap.val() };
-    else state.scores = {q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
+  db.ref('game/scores').on('value',s=>{
+    if(s.exists())state.scores={...state.scores,...s.val()};
+    else state.scores={q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
     render();
   });
-  db.ref('game/squares').on('value', snap => {
-    state.squares = snap.exists() ? snap.val() : {};
+  db.ref('game/squares').on('value',s=>{state.squares=s.exists()?s.val():{};render()});
+  db.ref('game/randomWinners').on('value',s=>{
+    state.randomWinners=s.exists()?{q1:null,q2:null,q3:null,q4:null,...s.val()}:{q1:null,q2:null,q3:null,q4:null};
     render();
   });
-  db.ref('game/randomWinners').on('value', snap => {
-    state.randomWinners = snap.exists() ? { q1:null,q2:null,q3:null,q4:null, ...snap.val() } : {q1:null,q2:null,q3:null,q4:null};
-    render();
+  // Chat
+  db.ref('game/chat').orderByChild('ts').limitToLast(100).on('value',s=>{
+    chatMessages=[];
+    if(s.exists())s.forEach(c=>{chatMessages.push({id:c.key,...c.val()})});
+    // Track unread when chat is collapsed
+    if(!chatOpen&&chatMessages.length>lastChatCount){
+      unreadCount+=chatMessages.length-lastChatCount;
+    }else{
+      unreadCount=0;
+    }
+    lastChatCount=chatMessages.length;
+    renderChatMessages();
   });
 }
 
-// ── Payout calculation ──
-function getPayouts() {
-  const n = state.config.numParticipants || 0;
-  const c = state.config.costPerPerson || 0;
-  const totalPot = n * c;
-  const randomTotal = RANDOM_PRIZE * 4;
-  const remaining = Math.max(0, totalPot - randomTotal);
-  // Q1-Q3: 20% each (60%), Q4: 40%
-  const q123 = Math.floor(remaining * 0.20);
-  const q4 = remaining - (q123 * 3);
-  return { totalPot, randomTotal, remaining, q1:q123, q2:q123, q3:q123, q4, randomPrize:RANDOM_PRIZE };
+function getPayouts(){
+  const n=state.config.numParticipants||0,c=state.config.costPerPerson||0;
+  const pot=n*c,rnd=RANDOM_PRIZE*4,rem=Math.max(0,pot-rnd);
+  const q123=Math.floor(rem*.20);
+  return{totalPot:pot,randomTotal:rnd,remaining:rem,q1:q123,q2:q123,q3:q123,q4:rem-(q123*3),randomPrize:RANDOM_PRIZE};
 }
 
-function getPlayerCount(name) { return Object.values(state.squares).filter(v => v === name).length; }
-function isAtLimit() {
-  const max = state.config.maxPerPlayer;
-  if (!max || max <= 0) return false;
-  return getPlayerCount(player) >= max;
-}
+function getPlayerCount(n){return Object.values(state.squares).filter(v=>v===n).length}
+function isAtLimit(){const m=state.config.maxPerPlayer;return m>0&&getPlayerCount(player)>=m}
 
-function claimSquare(row, col) {
-  const key = `r${row}c${col}`;
-  if (state.squares[key]) return;
-  if (isAtLimit()) { showToast(`Limit of ${state.config.maxPerPlayer} squares reached!`, 'error'); return; }
-  db.ref(`game/squares/${key}`).transaction(current => {
-    if (current) return;
-    return player;
-  }, (error, committed) => {
-    if (error) showToast('Error claiming square', 'error');
-    else if (!committed) showToast('Already claimed!', 'error');
-    else showToast('Square claimed!', 'success');
+function claimSquare(r,c){
+  const k=`r${r}c${c}`;
+  if(state.squares[k])return;
+  if(isAtLimit()){showToast(`Limit of ${state.config.maxPerPlayer} reached!`,'error');return}
+  db.ref(`game/squares/${k}`).transaction(cur=>{if(cur)return;return player},(e,ok)=>{
+    if(e)showToast('Error','error');else if(!ok)showToast('Already claimed!','error');else showToast('Claimed!','success');
   });
 }
 
-function drawRandomWinner(q) {
-  const owners = [...new Set(Object.values(state.squares))];
-  if (owners.length === 0) { showToast('No squares claimed yet!', 'error'); return; }
-  if (state.randomWinners[q]) {
-    if (!confirm(`${q.toUpperCase()} already has a winner (${state.randomWinners[q]}). Redraw?`)) return;
-  }
-  const winner = owners[Math.floor(Math.random() * owners.length)];
-  db.ref(`game/randomWinners/${q}`).set(winner);
-  showToast(`🎉 ${q.toUpperCase()} random winner: ${winner}!`, 'success');
+function drawRandomWinner(q){
+  const owners=[...new Set(Object.values(state.squares))];
+  if(!owners.length){showToast('No squares claimed!','error');return}
+  if(state.randomWinners[q]&&!confirm(`Redraw ${q.toUpperCase()}?`))return;
+  const w=owners[Math.floor(Math.random()*owners.length)];
+  db.ref(`game/randomWinners/${q}`).set(w);
+  db.ref('game/chat').push({name:'🎲',text:`${q.toUpperCase()} random draw winner: ${w}! 🎉`,ts:Date.now(),system:true});
+  showToast(`🎉 ${w} wins ${q.toUpperCase()} draw!`,'success');
 }
 
-function randomizeNumbers() {
-  const claimed = Object.keys(state.squares).length;
-  if (claimed < 100 && !confirm(`Only ${claimed}/100 squares claimed. Randomize anyway?`)) return;
-  db.ref('game/config').update({
-    numbersAssigned: true,
-    colNumbers: shuffle([0,1,2,3,4,5,6,7,8,9]),
-    rowNumbers: shuffle([0,1,2,3,4,5,6,7,8,9])
+function randomizeNumbers(){
+  const n=Object.keys(state.squares).length;
+  if(n<100&&!confirm(`Only ${n}/100 claimed. Randomize anyway?`))return;
+  db.ref('game/config').update({numbersAssigned:true,colNumbers:shuffle([0,1,2,3,4,5,6,7,8,9]),rowNumbers:shuffle([0,1,2,3,4,5,6,7,8,9])});
+  showToast('Numbers randomized!','success');
+}
+
+function saveScores(){
+  const v={};
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const a=document.getElementById(`${q}_t1`),b=document.getElementById(`${q}_t2`);
+    v[`${q}_t1`]=a&&a.value!==''?parseInt(a.value):null;
+    v[`${q}_t2`]=b&&b.value!==''?parseInt(b.value):null;
   });
-  showToast('Numbers randomized!', 'success');
+  db.ref('game/scores').set(v);
+  showToast('Scores saved!','success');
 }
 
-function saveScores() {
-  const vals = {};
-  ['q1','q2','q3','q4'].forEach(q => {
-    const t1 = document.getElementById(`${q}_t1`);
-    const t2 = document.getElementById(`${q}_t2`);
-    vals[`${q}_t1`] = t1 && t1.value !== '' ? parseInt(t1.value) : null;
-    vals[`${q}_t2`] = t2 && t2.value !== '' ? parseInt(t2.value) : null;
-  });
-  db.ref('game/scores').set(vals);
-  showToast('Scores saved!', 'success');
+function saveTeams(){
+  const a=document.getElementById('edit_team1').value.trim(),b=document.getElementById('edit_team2').value.trim();
+  if(a)db.ref('game/config/team1').set(a);if(b)db.ref('game/config/team2').set(b);
+  showToast('Teams updated!','success');
 }
 
-function saveTeams() {
-  const t1 = document.getElementById('edit_team1').value.trim();
-  const t2 = document.getElementById('edit_team2').value.trim();
-  if (t1) db.ref('game/config/team1').set(t1);
-  if (t2) db.ref('game/config/team2').set(t2);
-  showToast('Teams updated!', 'success');
+function saveMaxPerPlayer(){
+  const v=parseInt(document.getElementById('edit_max_per_player').value);
+  db.ref('game/config/maxPerPlayer').set(isNaN(v)||v<0?0:v);showToast('Saved!','success');
 }
 
-function saveMaxPerPlayer() {
-  const val = parseInt(document.getElementById('edit_max_per_player').value);
-  db.ref('game/config/maxPerPlayer').set(isNaN(val)||val<0 ? 0 : val);
-  showToast('Limit saved!', 'success');
+function saveGameSettings(){
+  const a=parseInt(document.getElementById('edit_num_participants').value)||0;
+  const b=parseInt(document.getElementById('edit_cost_per_person').value)||0;
+  db.ref('game/config').update({numParticipants:a,costPerPerson:b});showToast('Saved!','success');
 }
 
-function saveGameSettings() {
-  const np = parseInt(document.getElementById('edit_num_participants').value) || 0;
-  const cp = parseInt(document.getElementById('edit_cost_per_person').value) || 0;
-  db.ref('game/config').update({ numParticipants: np, costPerPerson: cp });
-  showToast('Settings saved!', 'success');
-}
-
-function resetGame() {
-  if (!confirm('Reset EVERYTHING?')) return;
-  if (!confirm('Are you really sure?')) return;
+function resetGame(){
+  if(!confirm('Reset EVERYTHING?')||!confirm('Really sure?'))return;
   db.ref('game').set({
-    config: { team1:state.config.team1, team2:state.config.team2, numbersAssigned:false, colNumbers:null, rowNumbers:null, maxPerPlayer:state.config.maxPerPlayer, numParticipants:state.config.numParticipants, costPerPerson:state.config.costPerPerson },
-    scores: {q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
-    squares: {},
-    randomWinners: {q1:null,q2:null,q3:null,q4:null}
+    config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson},
+    scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
+    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},chat:null
   });
-  showToast('Game reset!', 'success');
+  showToast('Game reset!','success');
 }
 
-function getWinner(q) {
-  const t1Score = state.scores[`${q}_t1`];
-  const t2Score = state.scores[`${q}_t2`];
-  if (t1Score===null || t2Score===null || !state.config.numbersAssigned) return null;
-  const col = state.config.colNumbers.indexOf(t1Score % 10);
-  const row = state.config.rowNumbers.indexOf(t2Score % 10);
-  if (col===-1 || row===-1) return null;
-  return { row, col, player: state.squares[`r${row}c${col}`] || 'Unclaimed' };
+function getWinner(q){
+  const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
+  if(a===null||b===null||!state.config.numbersAssigned)return null;
+  const col=state.config.colNumbers.indexOf(a%10),row=state.config.rowNumbers.indexOf(b%10);
+  if(col===-1||row===-1)return null;
+  return{row,col,player:state.squares[`r${row}c${col}`]||'Unclaimed'};
 }
 
-function fmt$(n) { return '$' + n.toLocaleString(); }
-
-function render() {
-  const app = document.getElementById('app');
-  if (!player) { app.innerHTML = renderSignIn(); return; }
-  app.innerHTML = renderGame();
+function sendChat(){
+  const i=document.getElementById('chatInput');if(!i)return;
+  const t=i.value.trim();if(!t)return;
+  db.ref('game/chat').push({name:player,text:t,ts:Date.now(),system:false});
+  i.value='';i.focus();
 }
 
-function renderSignIn() {
-  return `<div class="signin-wrap"><div class="signin-card">
+function renderChatMessages(){
+  const el=document.getElementById('chatMessages');
+  if(!el)return;
+  const atBot=el.scrollHeight-el.scrollTop-el.clientHeight<50;
+  el.innerHTML=chatMessages.length===0
+    ?'<div class="chat-empty">No messages yet. Say hi! 👋</div>'
+    :chatMessages.map(m=>{
+      const t=new Date(m.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+      if(m.system)return`<div class="chat-msg system">${m.text}</div>`;
+      return`<div class="chat-msg ${m.name===player?'yours':''}"><span class="chat-name">${m.name}</span>${escapeHTML(m.text)}<span class="chat-time">${t}</span></div>`;
+    }).join('');
+  if(atBot)el.scrollTop=el.scrollHeight;
+}
+
+function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt$(n){return'$'+n.toLocaleString()}
+
+function render(){
+  const app=document.getElementById('app');
+  if(!player){app.innerHTML=renderSignIn();return}
+  // Preserve chat input value
+  const chatVal=document.getElementById('chatInput')?.value||'';
+  app.innerHTML=renderGame();
+  const ci=document.getElementById('chatInput');
+  if(ci&&chatVal)ci.value=chatVal;
+  renderChatMessages();
+}
+
+function renderSignIn(){
+  return`<div class="signin-wrap"><div class="signin-card">
     <span class="emoji-football">🏈</span>
     <h1>SUPER BOWL SQUARES</h1>
-    <p class="subtitle">Enter your name to join the game</p>
+    <p class="subtitle">Enter your name to join</p>
     <input type="text" id="playerName" placeholder="Your name" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
     <button class="btn-join" onclick="joinGame()">Join Game</button>
   </div></div>`;
 }
 
-function renderGame() {
-  const { team1, team2 } = state.config;
-  const claimed = Object.keys(state.squares).length;
-  const yourCount = getPlayerCount(player);
-  const max = state.config.maxPerPlayer;
-  const atLimit = isAtLimit();
-  const payouts = getPayouts();
-  const hasMoney = payouts.totalPot > 0;
+function renderGame(){
+  const{team1,team2}=state.config;
+  const claimed=Object.keys(state.squares).length;
+  const yourCount=getPlayerCount(player);
+  const max=state.config.maxPerPlayer;
+  const atLimit=isAtLimit();
+  const pay=getPayouts();
+  const hasMoney=pay.totalPot>0;
+  const isAdmin=player===ADMIN_NAME;
 
-  const winners = {};
-  ['q1','q2','q3','q4'].forEach(q => { winners[q] = getWinner(q); });
-  const winnerCells = new Set();
-  Object.values(winners).forEach(w => { if(w) winnerCells.add(`r${w.row}c${w.col}`); });
-
-  const qLabels = {q1:'Q1',q2:'Q2',q3:'Q3',q4:'Q4/F'};
+  const winners={};
+  ['q1','q2','q3','q4'].forEach(q=>{winners[q]=getWinner(q)});
+  const winCells=new Set();
+  Object.values(winners).forEach(w=>{if(w)winCells.add(`r${w.row}c${w.col}`)});
+  const ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'Q4/F'};
 
   // Scoreboard
-  let scoreboardHTML = '';
-  ['q1','q2','q3','q4'].forEach(q => {
-    const t1=state.scores[`${q}_t1`], t2=state.scores[`${q}_t2`];
-    const w=winners[q], isW=w&&w.player;
-    scoreboardHTML += `<div class="score-row ${isW?'winner-row':''}">
-      <span class="team">${team1}</span>
-      <span class="score-num">${t1!==null?t1:'–'}</span>
-      <span class="qlabel">${qLabels[q]}</span>
-      <span class="score-num">${t2!==null?t2:'–'}</span>
-      <span class="team t2">${team2}</span>
+  let sb='';
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`],w=winners[q],isW=w&&w.player;
+    sb+=`<div class="score-row ${isW?'winner-row':''}">
+      <span class="team">${team1}</span><span class="score-num">${a!==null?a:'–'}</span>
+      <span class="qlabel">${ql[q]}</span>
+      <span class="score-num">${b!==null?b:'–'}</span><span class="team t2">${team2}</span>
       ${isW?`<span class="winner-badge">🏆 ${w.player}</span>`:''}
     </div>`;
   });
 
-  // Rules & Payouts (visible to all)
-  let rulesHTML = '';
-  if (hasMoney) {
-    rulesHTML = `<div class="rules-section">
-      <div class="rules-card">
+  // Rules
+  let rules='';
+  if(hasMoney){
+    rules=`<div class="rules-section">
+      <div class="collapsible-header ${rulesOpen?'is-open':''}" onclick="toggleRules()">
         <h3>💰 Rules & Payouts</h3>
+        <span class="chevron ${rulesOpen?'open':''}">▼</span>
+      </div>
+      <div class="collapsible-body ${rulesOpen?'open':''}"><div class="collapsible-inner">
         <div class="rules-grid">
           <span class="rl">Players</span><span class="rv">${state.config.numParticipants}</span>
           <span class="rl">Buy-in</span><span class="rv">${fmt$(state.config.costPerPerson)}</span>
-          <span class="rl">Total Pot</span><span class="rv green">${fmt$(payouts.totalPot)}</span>
-          ${max>0?`<span class="rl">Max squares/player</span><span class="rv">${max}</span>`:''}
+          <span class="rl">Total Pot</span><span class="rv green">${fmt$(pay.totalPot)}</span>
+          ${max>0?`<span class="rl">Max squares</span><span class="rv">${max}/player</span>`:''}
         </div>
-        <table class="payout-table" style="margin-top:16px">
+        <table class="payout-table">
           <tr><th>Prize</th><th>Amount</th><th>Winner</th></tr>
-          <tr><td>🎲 Q1 Random Draw</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${state.randomWinners.q1?`<span class="winner-name">🎉 ${state.randomWinners.q1}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>Q1 Score Winner</td><td class="amount">${fmt$(payouts.q1)}</td><td>${winners.q1?`<span class="winner-name">🏆 ${winners.q1.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>🎲 Q2 Random Draw</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${state.randomWinners.q2?`<span class="winner-name">🎉 ${state.randomWinners.q2}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>Q2 Score Winner</td><td class="amount">${fmt$(payouts.q2)}</td><td>${winners.q2?`<span class="winner-name">🏆 ${winners.q2.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>🎲 Q3 Random Draw</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${state.randomWinners.q3?`<span class="winner-name">🎉 ${state.randomWinners.q3}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>Q3 Score Winner</td><td class="amount">${fmt$(payouts.q3)}</td><td>${winners.q3?`<span class="winner-name">🏆 ${winners.q3.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>🎲 Q4 Random Draw</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${state.randomWinners.q4?`<span class="winner-name">🎉 ${state.randomWinners.q4}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-          <tr><td>Q4/Final Score Winner</td><td class="amount">${fmt$(payouts.q4)}</td><td>${winners.q4?`<span class="winner-name">🏆 ${winners.q4.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>
+          ${['q1','q2','q3','q4'].map(q=>{
+            const rw=state.randomWinners[q],sw=winners[q];
+            return`<tr><td>🎲 ${ql[q]} Random</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${rw?`<span class="winner-name">🎉 ${rw}</span>`:'<span class="pending">Pending</span>'}</td></tr>
+            <tr><td>${ql[q]} Score</td><td class="amount">${fmt$(pay[q])}</td><td>${sw?`<span class="winner-name">🏆 ${sw.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>`;
+          }).join('')}
         </table>
-      </div>
+      </div></div>
     </div>`;
   }
 
   // Grid
-  let gridHTML = '<div class="corner-cell num-cell"></div>';
-  for (let c=0;c<10;c++) {
-    const num = state.config.numbersAssigned ? state.config.colNumbers[c] : '?';
-    gridHTML += `<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${num}</div>`;
+  let g='<div class="corner-cell num-cell"></div>';
+  for(let c=0;c<10;c++){
+    const n=state.config.numbersAssigned?state.config.colNumbers[c]:'?';
+    g+=`<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${n}</div>`;
   }
-  for (let r=0;r<10;r++) {
-    const rNum = state.config.numbersAssigned ? state.config.rowNumbers[r] : '?';
-    gridHTML += `<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${rNum}</div>`;
-    for (let c=0;c<10;c++) {
-      const key=`r${r}c${c}`, owner=state.squares[key];
-      const isYours=owner===player, isWin=winnerCells.has(key);
+  for(let r=0;r<10;r++){
+    const rn=state.config.numbersAssigned?state.config.rowNumbers[r]:'?';
+    g+=`<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${rn}</div>`;
+    for(let c=0;c<10;c++){
+      const k=`r${r}c${c}`,o=state.squares[k];
+      const isY=o===player,isW=winCells.has(k);
       let cls='grid-cell';
-      if(isWin) cls+=' winner'; else if(isYours) cls+=' yours'; else if(owner) cls+=' claimed'; else if(atLimit) cls+=' maxed';
-      const click=(owner||atLimit)?'':`onclick="claimSquare(${r},${c})"`;
-      gridHTML += `<div class="${cls}" ${click} title="${owner||(atLimit?'At limit':'Open')}">${owner||''}</div>`;
+      if(isW)cls+=' winner';else if(isY)cls+=' yours';else if(o)cls+=' claimed';else if(atLimit)cls+=' maxed';
+      const cl=(o||atLimit)?'':`onclick="claimSquare(${r},${c})"`;
+      g+=`<div class="${cls}" ${cl} title="${o||(atLimit?'At limit':'Open')}">${o||''}</div>`;
     }
   }
 
-  // Admin score inputs
-  let scoreInputsHTML = '';
-  ['q1','q2','q3','q4'].forEach(q => {
-    const t1=state.scores[`${q}_t1`], t2=state.scores[`${q}_t2`];
-    scoreInputsHTML += `<span class="ql">${qLabels[q]}</span>
-      <input type="number" id="${q}_t1" placeholder="${team1}" value="${t1!==null?t1:''}" min="0">
-      <input type="number" id="${q}_t2" placeholder="${team2}" value="${t2!==null?t2:''}" min="0">
-      <span></span>`;
+  // Score inputs
+  let si='';
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
+    si+=`<span class="ql">${ql[q]}</span>
+      <input type="number" id="${q}_t1" placeholder="${team1}" value="${a!==null?a:''}" min="0">
+      <input type="number" id="${q}_t2" placeholder="${team2}" value="${b!==null?b:''}" min="0">`;
   });
 
-  const isAdmin = player === ADMIN_NAME;
-  let yourLabel = max>0 ? `You: <span class="count ${atLimit?'at-limit':''}">${yourCount}/${max}</span>` : `You: <span class="count">${yourCount}</span>`;
+  const yourLbl=max>0?`You: <span class="count ${atLimit?'at-limit':''}">${yourCount}/${max}</span>`:`You: <span class="count">${yourCount}</span>`;
+  const unreadBadge=unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
 
-  return `
+  return`
     <div class="header">
       <h1>🏈 SUPER BOWL SQUARES</h1>
       <div class="user-bar">Playing as <span class="name">${player}</span></div>
     </div>
-
-    <div class="scoreboard">${scoreboardHTML}</div>
-    ${rulesHTML}
-
+    <div class="scoreboard">${sb}</div>
+    ${rules}
     <div class="grid-section">
       <div class="grid-wrapper">
         <div class="team-label-top">${getLogoHTML(team1)} ${team1} ${getLogoHTML(team1)}</div>
         <div class="grid-outer">
           <div class="team-label-left">${getLogoHTML(team2)} ${team2} ${getLogoHTML(team2)}</div>
-          <div class="grid">${gridHTML}</div>
+          <div class="grid">${g}</div>
         </div>
       </div>
     </div>
-
     <div class="stats">
       <span><span class="count">${claimed}</span>/100 claimed</span>
-      <span>${yourLabel}</span>
+      <span>${yourLbl}</span>
     </div>
-
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch swatch-open"></div>Open</div>
       <div class="legend-item"><div class="legend-swatch swatch-yours"></div>Yours</div>
@@ -485,87 +517,70 @@ function renderGame() {
       <div class="legend-item"><div class="legend-swatch swatch-winner"></div>Winner</div>
     </div>
 
-    ${isAdmin ? `
-    <div class="admin-section" style="margin-top:32px">
+    <div class="chat-section">
+      <div class="collapsible-header ${chatOpen?'is-open':''}" onclick="toggleChat()">
+        <h3>💬 Chat ${unreadBadge}</h3>
+        <span class="chevron ${chatOpen?'open':''}">▼</span>
+      </div>
+      <div class="collapsible-body ${chatOpen?'open':''}"><div class="collapsible-inner">
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
+          <button onclick="sendChat()">Send</button>
+        </div>
+      </div></div>
+    </div>
+
+    ${isAdmin?`
+    <div class="admin-section" style="margin-top:16px">
       <div class="admin-toggle"><button onclick="toggleAdmin()">⚙️ Admin Panel</button></div>
       <div class="admin-panel ${adminOpen?'open':''}">
-
         <h3>⚙️ Teams</h3>
         <div class="admin-row"><label>Team 1:</label><input type="text" id="edit_team1" value="${team1}" maxlength="30"></div>
         <div class="admin-row"><label>Team 2:</label><input type="text" id="edit_team2" value="${team2}" maxlength="30"></div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button></div>
-
         <hr class="admin-divider">
         <h3>💰 Game Settings</h3>
-        <div class="admin-row"><label># Participants:</label><input type="number" id="edit_num_participants" value="${state.config.numParticipants||''}" min="0" placeholder="0"></div>
-        <div class="admin-row"><label>$ Per Person:</label><input type="number" id="edit_cost_per_person" value="${state.config.costPerPerson||''}" min="0" placeholder="0"></div>
-        <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveGameSettings()">Save Settings</button></div>
-        ${hasMoney ? `<p class="admin-msg">Total pot: ${fmt$(payouts.totalPot)} → Random draws: ${fmt$(payouts.randomTotal)} | Q1-Q3: ${fmt$(payouts.q1)} each | Q4: ${fmt$(payouts.q4)}</p>` : '<p class="admin-msg">Set participants and cost to see payout breakdown.</p>'}
-
+        <div class="admin-row"><label># Participants:</label><input type="number" id="edit_num_participants" value="${state.config.numParticipants||''}" min="0"></div>
+        <div class="admin-row"><label>$ Per Person:</label><input type="number" id="edit_cost_per_person" value="${state.config.costPerPerson||''}" min="0"></div>
+        <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveGameSettings()">Save</button></div>
+        ${hasMoney?`<p class="admin-msg">Pot: ${fmt$(pay.totalPot)} → Draws: ${fmt$(pay.randomTotal)} | Q1-3: ${fmt$(pay.q1)} ea | Q4: ${fmt$(pay.q4)}</p>`:''}
         <hr class="admin-divider">
         <h3>🎯 Square Limits</h3>
-        <div class="admin-row">
-          <label>Max per player:</label>
-          <input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0 = none">
-          <button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button>
-        </div>
-        <p class="admin-msg">${max>0?`Limit: ${max} per player.`:'No limit set.'}</p>
-
+        <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
         <hr class="admin-divider">
-        <h3>🎲 Random Quarter Draws</h3>
-        <p class="admin-msg" style="margin-bottom:8px">Draw a random winner from all players with claimed squares. ${fmt$(RANDOM_PRIZE)} each.</p>
+        <h3>🎲 Random Draws</h3>
+        <p class="admin-msg" style="margin-bottom:6px">${fmt$(RANDOM_PRIZE)} each.</p>
         <div class="random-draws">
-          <div class="draw-row"><span class="draw-label">Q1:</span><span class="draw-winner">${state.randomWinners.q1||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('q1')">🎲 Draw</button></div>
-          <div class="draw-row"><span class="draw-label">Q2:</span><span class="draw-winner">${state.randomWinners.q2||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('q2')">🎲 Draw</button></div>
-          <div class="draw-row"><span class="draw-label">Q3:</span><span class="draw-winner">${state.randomWinners.q3||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('q3')">🎲 Draw</button></div>
-          <div class="draw-row"><span class="draw-label">Q4:</span><span class="draw-winner">${state.randomWinners.q4||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('q4')">🎲 Draw</button></div>
+          ${['q1','q2','q3','q4'].map(q=>`<div class="draw-row"><span class="draw-label">${ql[q]}:</span><span class="draw-winner">${state.randomWinners[q]||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('${q}')">🎲 Draw</button></div>`).join('')}
         </div>
-
         <hr class="admin-divider">
-        <div class="admin-row">
-          <button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>
-            🎲 ${state.config.numbersAssigned ? 'Numbers Assigned' : 'Randomize Numbers'}
-          </button>
-        </div>
-        ${state.config.numbersAssigned ? '<p class="admin-msg">Numbers locked. Reset to re-randomize.</p>' : `<p class="admin-msg">${100-claimed} squares remaining.</p>`}
-
+        <div class="admin-row"><button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>${state.config.numbersAssigned?'Numbers Assigned':'🎲 Randomize Numbers'}</button></div>
+        ${state.config.numbersAssigned?'<p class="admin-msg">Locked. Reset to re-randomize.</p>':`<p class="admin-msg">${100-claimed} squares left.</p>`}
         <hr class="admin-divider">
-        <h3>📊 Enter Scores</h3>
+        <h3>📊 Scores</h3>
         <div class="score-inputs">
-          <span></span><span class="ql" style="text-align:center;font-size:12px">${team1}</span><span class="ql" style="text-align:center;font-size:12px">${team2}</span><span></span>
-          ${scoreInputsHTML}
+          <span></span><span class="ql" style="text-align:center;font-size:11px">${team1}</span><span class="ql" style="text-align:center;font-size:11px">${team2}</span>
+          ${si}
         </div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveScores()">💾 Save Scores</button></div>
-
         <hr class="admin-divider">
-        <div class="admin-row"><button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Entire Game</button></div>
+        <div class="admin-row"><button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Game</button></div>
       </div>
-    </div>` : ''}`;
+    </div>`:''}`;
 }
 
-function joinGame() {
-  const input = document.getElementById('playerName');
-  const name = input.value.trim();
-  if (!name) return;
-  player = name;
-  localStorage.setItem('sbsq_player', player);
-  render();
+function joinGame(){
+  const i=document.getElementById('playerName'),n=i.value.trim();
+  if(!n)return;player=n;localStorage.setItem('sbsq_player',player);render();
 }
-function toggleAdmin() { adminOpen=!adminOpen; render(); }
-function shuffle(arr) {
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
-}
-function showToast(msg,type='') {
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className=`toast ${type} show`;
-  setTimeout(()=>el.className='toast',2500);
-}
+function toggleAdmin(){adminOpen=!adminOpen;render()}
+function toggleRules(){rulesOpen=!rulesOpen;render()}
+function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
 
-initGame();
-setupListeners();
-render();
+initGame();setupListeners();render();
 </script>
 </body>
 </html>
