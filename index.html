@@ -19,7 +19,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input{font-family:inherit;outline:none}
 
-/* ── SIGN IN ── */
 .signin-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
 .signin-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px 28px;max-width:360px;width:100%;text-align:center}
 .signin-card h1{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;line-height:1;margin-bottom:4px}
@@ -30,13 +29,18 @@ input{font-family:inherit;outline:none}
 .signin-card .btn-join:hover{background:#2563EB}
 .emoji-football{font-size:48px;margin-bottom:12px;display:block}
 
-/* ── HEADER ── */
 .header{text-align:center;padding:16px 12px 0}
 .header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,52px);letter-spacing:3px;line-height:1}
 .header .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
 
-/* ── SCOREBOARD ── */
+/* Lock banner */
+.lock-banner{max-width:600px;margin:12px auto;padding:0 12px}
+.lock-banner-inner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 20px;text-align:center}
+.lock-banner-inner .lock-icon{font-size:28px;margin-bottom:4px}
+.lock-banner-inner .lock-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--red);margin-bottom:4px}
+.lock-banner-inner .lock-text{font-size:13px;color:var(--muted)}
+
 .scoreboard{max-width:600px;margin:12px auto;padding:0 12px}
 .score-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 0;font-size:clamp(11px,2.5vw,15px);border-bottom:1px solid var(--border)}
 .score-row:last-child{border:none}
@@ -47,8 +51,7 @@ input{font-family:inherit;outline:none}
 .score-row.winner-row{background:rgba(251,191,36,.08);border-radius:8px}
 .score-row .winner-badge{font-size:10px;color:var(--gold);font-weight:700;margin-left:2px;white-space:nowrap}
 
-/* ── COLLAPSIBLE ── */
-.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;-webkit-user-select:none;user-select:none;transition:border-radius .2s}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;-webkit-user-select:none;user-select:none;transition:border-radius .15s}
 .collapsible-header.is-open{border-radius:12px 12px 0 0}
 .collapsible-header h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--accent);margin:0}
 .collapsible-header .chevron{color:var(--muted);font-size:16px;transition:transform .25s}
@@ -57,8 +60,7 @@ input{font-family:inherit;outline:none}
 .collapsible-body.open{max-height:3000px}
 .collapsible-inner{padding:14px 16px}
 
-/* ── RULES ── */
-.rules-section{max-width:600px;margin:8px auto;padding:0 12px}
+.rules-section,.participants-section,.chat-section{max-width:600px;margin:8px auto;padding:0 12px}
 .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:13px}
 .rules-grid .rl{color:var(--muted)}
 .rules-grid .rv{font-weight:600;text-align:right}
@@ -71,7 +73,13 @@ input{font-family:inherit;outline:none}
 .payout-table .winner-name{color:var(--gold);font-weight:600;font-size:11px}
 .payout-table .pending{color:var(--dim);font-style:italic;font-size:11px}
 
-/* ── GRID ── */
+.participants-list{display:flex;flex-wrap:wrap;gap:6px}
+.participant-chip{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px}
+.participant-chip .p-name{font-weight:600;color:var(--text)}
+.participant-chip .p-count{color:var(--muted);font-size:11px;font-weight:500}
+.participant-chip.is-you{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.08)}
+.participant-chip.is-you .p-name{color:var(--green)}
+
 .grid-section{display:flex;flex-direction:column;align-items:center;padding:10px 4px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .grid-wrapper{display:inline-flex;flex-direction:column;align-items:center;min-width:min-content}
 .team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(15px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding-left:calc(var(--num-size) + 6px)}
@@ -80,6 +88,7 @@ input{font-family:inherit;outline:none}
 .team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(15px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:3px;display:flex;align-items:center;justify-content:center;gap:6px;padding-top:calc(var(--num-size) + 4px)}
 .team-label-left img{height:clamp(18px,4.5vw,40px);width:auto;object-fit:contain;transform:rotate(90deg)}
 .grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
+.grid.locked{opacity:.45;pointer-events:none;filter:grayscale(.3)}
 .num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,2.5vw,20px);color:var(--muted);border-radius:3px}
 .num-cell.assigned{color:var(--text);font-weight:700}
 .corner-cell{background:transparent}
@@ -91,7 +100,6 @@ input{font-family:inherit;outline:none}
 .grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 10px rgba(251,191,36,.08)}
 .grid-cell.maxed{cursor:not-allowed;opacity:.5}
 
-/* ── STATS & LEGEND ── */
 .stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
 .stats span{background:var(--bg2);padding:5px 10px;border-radius:8px;border:1px solid var(--border)}
 .stats .count{color:var(--text);font-weight:600}
@@ -104,24 +112,36 @@ input{font-family:inherit;outline:none}
 .swatch-winner{background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4)}
 .swatch-open{background:var(--bg3);border:1px dashed var(--dim)}
 
-/* ── CHAT ── */
-.chat-section{max-width:600px;margin:12px auto;padding:0 12px}
-.chat-messages{height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.chat-messages{height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .chat-msg{font-size:13px;padding:6px 10px;border-radius:8px;background:var(--bg3);word-wrap:break-word;line-height:1.35}
 .chat-msg .chat-name{font-weight:700;color:var(--accent);margin-right:6px;font-size:12px}
 .chat-msg .chat-time{color:var(--dim);font-size:10px;float:right;margin-top:2px}
 .chat-msg.yours{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.12)}
 .chat-msg.yours .chat-name{color:var(--green)}
 .chat-msg.system{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);text-align:center;font-style:italic;font-size:12px;color:var(--gold)}
+.chat-msg img.chat-gif{max-width:200px;max-height:160px;border-radius:6px;margin-top:4px;display:block}
 .chat-input-row{display:flex;gap:6px}
-.chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px}
+.chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;min-width:0}
 .chat-input-row input:focus{border-color:var(--accent)}
-.chat-input-row button{padding:10px 18px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
-.chat-input-row button:active{background:#2563EB;transform:scale(.97)}
+.chat-input-row button{padding:10px 14px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
+.chat-input-row button:active{transform:scale(.97)}
+.btn-gif{background:var(--bg4) !important;color:var(--text) !important;font-size:16px !important;padding:10px 12px !important}
 .chat-empty{text-align:center;color:var(--dim);font-size:13px;padding:40px 0;font-style:italic}
 .chat-unread{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:8px}
 
-/* ── ADMIN ── */
+.gif-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gif-picker{background:var(--bg2);border:1px solid var(--border);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden}
+.gif-picker-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.gif-picker-header input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px}
+.gif-picker-header input:focus{border-color:var(--accent)}
+.gif-picker-header button{padding:8px 12px;border-radius:8px;background:var(--bg4);color:var(--muted);font-size:18px;line-height:1}
+.gif-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;-webkit-overflow-scrolling:touch}
+.gif-grid img{width:100%;border-radius:6px;cursor:pointer;transition:transform .1s;display:block;background:var(--bg3);min-height:80px;object-fit:cover}
+.gif-grid img:active{transform:scale(.95)}
+.gif-grid .gif-loading,.gif-grid .gif-empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--dim);font-size:13px}
+.giphy-attr{text-align:center;padding:6px;font-size:10px;color:var(--dim);border-top:1px solid var(--border)}
+
 .admin-section{max-width:500px;margin:0 auto 40px;padding:0 12px}
 .admin-toggle{display:flex;justify-content:center;margin-bottom:12px}
 .admin-toggle button{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:8px 20px;border-radius:8px;font-size:13px;transition:all .2s}
@@ -142,6 +162,22 @@ input{font-family:inherit;outline:none}
 .btn-admin:disabled{opacity:.4;cursor:not-allowed}
 .admin-divider{border:none;border-top:1px solid var(--border);margin:12px 0}
 .admin-msg{font-size:11px;color:var(--muted);margin-top:4px}
+
+.game-lock-btn{width:100%;padding:14px;border-radius:10px;font-size:15px;font-weight:700;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;transition:all .15s}
+.game-lock-btn:active{transform:scale(.97)}
+.game-lock-btn.is-locked{background:var(--green);color:#fff}
+.game-lock-btn.is-open{background:var(--red);color:#fff}
+.game-status{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.status-dot.live{background:var(--green);box-shadow:0 0 6px rgba(16,185,129,.5);animation:pulse 2s infinite}
+.status-dot.off{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.settings-checklist{margin-top:10px;font-size:12px}
+.settings-checklist .check-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.check-row .check-icon{font-size:14px;width:18px;text-align:center}
+.check-row.done{color:var(--green)}
+.check-row.missing{color:var(--muted)}
+
 .score-inputs{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:10px}
 .score-inputs .ql{font-size:12px;font-weight:600;color:var(--muted)}
 .score-inputs input{padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;width:100%}
@@ -150,23 +186,23 @@ input{font-family:inherit;outline:none}
 .draw-row .draw-label{min-width:36px;font-weight:600;color:var(--muted)}
 .draw-row .draw-winner{color:var(--gold);font-weight:600;flex:1;min-width:60px}
 
-/* ── TOAST ── */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:var(--green);color:var(--green)}
 .toast.error{border-color:var(--red);color:var(--red)}
 
-/* ── MOBILE ── */
 @media(max-width:480px){
   :root{--cell-size:clamp(26px,8.2vw,34px);--num-size:clamp(18px,4.5vw,22px)}
   .header{padding:12px 8px 0}
   .header h1{font-size:26px;letter-spacing:2px}
   .scoreboard{padding:0 8px;margin:10px auto}
-  .rules-section,.chat-section,.admin-section{padding:0 8px}
+  .rules-section,.participants-section,.chat-section,.admin-section,.lock-banner{padding:0 8px}
   .collapsible-header{padding:10px 12px}
   .collapsible-inner{padding:10px 12px}
   .admin-panel{padding:14px}
-  .chat-messages{height:200px}
+  .chat-messages{height:220px}
+  .chat-msg img.chat-gif{max-width:160px;max-height:120px}
+  .gif-picker{max-height:60vh}
   .grid-section{padding:8px 2px 12px}
 }
 @media(max-width:360px){
@@ -179,6 +215,7 @@ input{font-family:inherit;outline:none}
 <body>
 
 <div id="app"></div>
+<div id="gifOverlay"></div>
 <div id="toast" class="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -195,6 +232,7 @@ const FIREBASE_CONFIG = {
   appId: "1:108206314478:web:3f7577f034b7ce3a9774ff"
 };
 
+const GIPHY_KEY = "dc6zaTOxFJmzC";
 const DEFAULT_TEAM1 = "Patriots";
 const DEFAULT_TEAM2 = "Seahawks";
 const ADMIN_NAME = "Sean";
@@ -225,12 +263,14 @@ let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
 let rulesOpen = false;
 let chatOpen = true;
+let participantsOpen = false;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
+let gifSearchTimeout = null;
 
 let state = {
-  config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0},
+  config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0,gameLocked:true},
   scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
   squares:{},
   randomWinners:{q1:null,q2:null,q3:null,q4:null}
@@ -249,6 +289,7 @@ function setupListeners(){
       state.config={...state.config,...s.val()};
       if(state.config.colNumbers&&!Array.isArray(state.config.colNumbers))state.config.colNumbers=Object.values(state.config.colNumbers);
       if(state.config.rowNumbers&&!Array.isArray(state.config.rowNumbers))state.config.rowNumbers=Object.values(state.config.rowNumbers);
+      if(state.config.gameLocked===undefined)state.config.gameLocked=true;
     }
     render();
   });
@@ -262,20 +303,17 @@ function setupListeners(){
     state.randomWinners=s.exists()?{q1:null,q2:null,q3:null,q4:null,...s.val()}:{q1:null,q2:null,q3:null,q4:null};
     render();
   });
-  // Chat
-  db.ref('game/chat').orderByChild('ts').limitToLast(100).on('value',s=>{
+  db.ref('game/chat').orderByChild('ts').limitToLast(150).on('value',s=>{
     chatMessages=[];
     if(s.exists())s.forEach(c=>{chatMessages.push({id:c.key,...c.val()})});
-    // Track unread when chat is collapsed
-    if(!chatOpen&&chatMessages.length>lastChatCount){
-      unreadCount+=chatMessages.length-lastChatCount;
-    }else{
-      unreadCount=0;
-    }
+    if(!chatOpen&&chatMessages.length>lastChatCount)unreadCount+=chatMessages.length-lastChatCount;
+    else unreadCount=0;
     lastChatCount=chatMessages.length;
     renderChatMessages();
   });
 }
+
+function isGameLocked(){return state.config.gameLocked!==false}
 
 function getPayouts(){
   const n=state.config.numParticipants||0,c=state.config.costPerPerson||0;
@@ -284,16 +322,52 @@ function getPayouts(){
   return{totalPot:pot,randomTotal:rnd,remaining:rem,q1:q123,q2:q123,q3:q123,q4:rem-(q123*3),randomPrize:RANDOM_PRIZE};
 }
 
+function getParticipants(){
+  const counts={};
+  Object.values(state.squares).forEach(n=>{counts[n]=(counts[n]||0)+1});
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([name,count])=>({name,count}));
+}
+
 function getPlayerCount(n){return Object.values(state.squares).filter(v=>v===n).length}
 function isAtLimit(){const m=state.config.maxPerPlayer;return m>0&&getPlayerCount(player)>=m}
 
 function claimSquare(r,c){
+  if(isGameLocked()){showToast('Game is locked — waiting for admin','error');return}
   const k=`r${r}c${c}`;
   if(state.squares[k])return;
   if(isAtLimit()){showToast(`Limit of ${state.config.maxPerPlayer} reached!`,'error');return}
   db.ref(`game/squares/${k}`).transaction(cur=>{if(cur)return;return player},(e,ok)=>{
     if(e)showToast('Error','error');else if(!ok)showToast('Already claimed!','error');else showToast('Claimed!','success');
   });
+}
+
+function getSettingsChecklist(){
+  const c=state.config;
+  return [
+    {label:'Teams configured',done:c.team1&&c.team1!==DEFAULT_TEAM1&&c.team2&&c.team2!==DEFAULT_TEAM2},
+    {label:'# Participants set',done:(c.numParticipants||0)>0},
+    {label:'$ Per Person set',done:(c.costPerPerson||0)>0},
+    {label:'Max squares/player set',done:(c.maxPerPlayer||0)>0},
+  ];
+}
+
+function toggleGameLock(){
+  const opening=isGameLocked();
+  if(opening){
+    const checks=getSettingsChecklist();
+    const missing=checks.filter(c=>!c.done);
+    if(missing.length){
+      if(!confirm(`These settings aren't configured yet:\n\n${missing.map(m=>'• '+m.label).join('\n')}\n\nOpen the game anyway?`))return;
+    }
+  }
+  db.ref('game/config/gameLocked').set(!opening);
+  if(opening){
+    db.ref('game/chat').push({name:'🏈',text:'The game is now OPEN! Start claiming your squares!',ts:Date.now(),system:true});
+    showToast('Game opened!','success');
+  }else{
+    db.ref('game/chat').push({name:'🔒',text:'The game has been locked by the admin.',ts:Date.now(),system:true});
+    showToast('Game locked','success');
+  }
 }
 
 function drawRandomWinner(q){
@@ -320,8 +394,7 @@ function saveScores(){
     v[`${q}_t1`]=a&&a.value!==''?parseInt(a.value):null;
     v[`${q}_t2`]=b&&b.value!==''?parseInt(b.value):null;
   });
-  db.ref('game/scores').set(v);
-  showToast('Scores saved!','success');
+  db.ref('game/scores').set(v);showToast('Scores saved!','success');
 }
 
 function saveTeams(){
@@ -329,22 +402,19 @@ function saveTeams(){
   if(a)db.ref('game/config/team1').set(a);if(b)db.ref('game/config/team2').set(b);
   showToast('Teams updated!','success');
 }
-
 function saveMaxPerPlayer(){
   const v=parseInt(document.getElementById('edit_max_per_player').value);
   db.ref('game/config/maxPerPlayer').set(isNaN(v)||v<0?0:v);showToast('Saved!','success');
 }
-
 function saveGameSettings(){
   const a=parseInt(document.getElementById('edit_num_participants').value)||0;
   const b=parseInt(document.getElementById('edit_cost_per_person').value)||0;
   db.ref('game/config').update({numParticipants:a,costPerPerson:b});showToast('Saved!','success');
 }
-
 function resetGame(){
   if(!confirm('Reset EVERYTHING?')||!confirm('Really sure?'))return;
   db.ref('game').set({
-    config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson},
+    config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true},
     scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
     squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},chat:null
   });
@@ -359,34 +429,84 @@ function getWinner(q){
   return{row,col,player:state.squares[`r${row}c${col}`]||'Unclaimed'};
 }
 
+// ── Chat ──
 function sendChat(){
   const i=document.getElementById('chatInput');if(!i)return;
   const t=i.value.trim();if(!t)return;
   db.ref('game/chat').push({name:player,text:t,ts:Date.now(),system:false});
   i.value='';i.focus();
 }
-
+function sendGif(url){
+  db.ref('game/chat').push({name:player,gif:url,ts:Date.now(),system:false});
+  closeGifPicker();
+}
 function renderChatMessages(){
-  const el=document.getElementById('chatMessages');
-  if(!el)return;
+  const el=document.getElementById('chatMessages');if(!el)return;
   const atBot=el.scrollHeight-el.scrollTop-el.clientHeight<50;
   el.innerHTML=chatMessages.length===0
     ?'<div class="chat-empty">No messages yet. Say hi! 👋</div>'
     :chatMessages.map(m=>{
       const t=new Date(m.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
       if(m.system)return`<div class="chat-msg system">${m.text}</div>`;
-      return`<div class="chat-msg ${m.name===player?'yours':''}"><span class="chat-name">${m.name}</span>${escapeHTML(m.text)}<span class="chat-time">${t}</span></div>`;
+      const isYou=m.name===player;
+      const content=m.gif
+        ?`<img class="chat-gif" src="${escapeAttr(m.gif)}" alt="GIF" loading="lazy">`
+        :escapeHTML(m.text||'');
+      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name">${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}</div>`;
     }).join('');
   if(atBot)el.scrollTop=el.scrollHeight;
 }
 
+// ── GIPHY ──
+function openGifPicker(){
+  document.getElementById('gifOverlay').innerHTML=`
+    <div class="gif-overlay" onclick="if(event.target===this)closeGifPicker()">
+      <div class="gif-picker">
+        <div class="gif-picker-header">
+          <input type="text" id="gifSearch" placeholder="Search GIFs..." oninput="onGifSearch()" autofocus>
+          <button onclick="closeGifPicker()">✕</button>
+        </div>
+        <div class="gif-grid" id="gifGrid"><div class="gif-loading">Loading trending GIFs...</div></div>
+        <div class="giphy-attr">Powered by GIPHY</div>
+      </div>
+    </div>`;
+  loadTrendingGifs();
+}
+function closeGifPicker(){document.getElementById('gifOverlay').innerHTML=''}
+function onGifSearch(){
+  clearTimeout(gifSearchTimeout);
+  const q=document.getElementById('gifSearch')?.value?.trim();
+  gifSearchTimeout=setTimeout(()=>{if(!q)loadTrendingGifs();else searchGifs(q)},400);
+}
+async function loadTrendingGifs(){
+  const grid=document.getElementById('gifGrid');if(!grid)return;
+  grid.innerHTML='<div class="gif-loading">Loading...</div>';
+  try{const r=await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=20&rating=pg-13`);const d=await r.json();renderGifGrid(d.data)}
+  catch(e){grid.innerHTML='<div class="gif-empty">Failed to load GIFs</div>'}
+}
+async function searchGifs(query){
+  const grid=document.getElementById('gifGrid');if(!grid)return;
+  grid.innerHTML='<div class="gif-loading">Searching...</div>';
+  try{const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=20&rating=pg-13`);const d=await r.json();
+    if(!d.data.length)grid.innerHTML='<div class="gif-empty">No GIFs found</div>';else renderGifGrid(d.data)}
+  catch(e){grid.innerHTML='<div class="gif-empty">Search failed</div>'}
+}
+function renderGifGrid(gifs){
+  const grid=document.getElementById('gifGrid');if(!grid)return;
+  grid.innerHTML=gifs.map(g=>{
+    const url=g.images.fixed_height.url;
+    const preview=g.images.fixed_height_small?.url||url;
+    return`<img src="${preview}" data-full="${url}" alt="${escapeAttr(g.title)}" onclick="sendGif(this.dataset.full)" loading="lazy">`;
+  }).join('');
+}
+
 function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function escapeAttr(s){return s.replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function fmt$(n){return'$'+n.toLocaleString()}
 
 function render(){
   const app=document.getElementById('app');
   if(!player){app.innerHTML=renderSignIn();return}
-  // Preserve chat input value
   const chatVal=document.getElementById('chatInput')?.value||'';
   app.innerHTML=renderGame();
   const ci=document.getElementById('chatInput');
@@ -410,9 +530,11 @@ function renderGame(){
   const yourCount=getPlayerCount(player);
   const max=state.config.maxPerPlayer;
   const atLimit=isAtLimit();
+  const locked=isGameLocked();
   const pay=getPayouts();
   const hasMoney=pay.totalPot>0;
   const isAdmin=player===ADMIN_NAME;
+  const participants=getParticipants();
 
   const winners={};
   ['q1','q2','q3','q4'].forEach(q=>{winners[q]=getWinner(q)});
@@ -431,6 +553,16 @@ function renderGame(){
       ${isW?`<span class="winner-badge">🏆 ${w.player}</span>`:''}
     </div>`;
   });
+
+  // Lock banner for non-admin
+  let lockBanner='';
+  if(locked&&!isAdmin){
+    lockBanner=`<div class="lock-banner"><div class="lock-banner-inner">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">GAME NOT YET OPEN</div>
+      <div class="lock-text">The admin is setting up the game. Squares will be available once the game is opened.</div>
+    </div></div>`;
+  }
 
   // Rules
   let rules='';
@@ -459,7 +591,24 @@ function renderGame(){
     </div>`;
   }
 
+  // Participants
+  let partsHTML=`<div class="participants-section">
+    <div class="collapsible-header ${participantsOpen?'is-open':''}" onclick="toggleParticipants()">
+      <h3>👥 Players (${participants.length})</h3>
+      <span class="chevron ${participantsOpen?'open':''}">▼</span>
+    </div>
+    <div class="collapsible-body ${participantsOpen?'open':''}"><div class="collapsible-inner">
+      ${participants.length===0?'<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">No squares claimed yet</div>'
+      :`<div class="participants-list">${participants.map(p=>
+        `<div class="participant-chip ${p.name===player?'is-you':''}">
+          <span class="p-name">${escapeHTML(p.name)}</span>
+          <span class="p-count">${p.count} sq</span>
+        </div>`).join('')}</div>`}
+    </div></div>
+  </div>`;
+
   // Grid
+  const gridLocked=locked&&!isAdmin;
   let g='<div class="corner-cell num-cell"></div>';
   for(let c=0;c<10;c++){
     const n=state.config.numbersAssigned?state.config.colNumbers[c]:'?';
@@ -472,13 +621,14 @@ function renderGame(){
       const k=`r${r}c${c}`,o=state.squares[k];
       const isY=o===player,isW=winCells.has(k);
       let cls='grid-cell';
-      if(isW)cls+=' winner';else if(isY)cls+=' yours';else if(o)cls+=' claimed';else if(atLimit)cls+=' maxed';
-      const cl=(o||atLimit)?'':`onclick="claimSquare(${r},${c})"`;
-      g+=`<div class="${cls}" ${cl} title="${o||(atLimit?'At limit':'Open')}">${o||''}</div>`;
+      if(isW)cls+=' winner';else if(isY)cls+=' yours';else if(o)cls+=' claimed';else if(atLimit||gridLocked)cls+=' maxed';
+      const clickable=!o&&!atLimit&&!gridLocked;
+      const cl=clickable?`onclick="claimSquare(${r},${c})"`:'';
+      g+=`<div class="${cls}" ${cl} title="${o||(gridLocked?'Locked':atLimit?'At limit':'Open')}">${o||''}</div>`;
     }
   }
 
-  // Score inputs
+  // Admin score inputs
   let si='';
   ['q1','q2','q3','q4'].forEach(q=>{
     const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
@@ -490,25 +640,32 @@ function renderGame(){
   const yourLbl=max>0?`You: <span class="count ${atLimit?'at-limit':''}">${yourCount}/${max}</span>`:`You: <span class="count">${yourCount}</span>`;
   const unreadBadge=unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
 
+  // Admin checklist
+  const checks=getSettingsChecklist();
+  const checklistHTML=checks.map(c=>`<div class="check-row ${c.done?'done':'missing'}"><span class="check-icon">${c.done?'✅':'⬜'}</span>${c.label}</div>`).join('');
+
   return`
     <div class="header">
       <h1>🏈 SUPER BOWL SQUARES</h1>
       <div class="user-bar">Playing as <span class="name">${player}</span></div>
     </div>
     <div class="scoreboard">${sb}</div>
+    ${lockBanner}
     ${rules}
+    ${partsHTML}
     <div class="grid-section">
       <div class="grid-wrapper">
         <div class="team-label-top">${getLogoHTML(team1)} ${team1} ${getLogoHTML(team1)}</div>
         <div class="grid-outer">
           <div class="team-label-left">${getLogoHTML(team2)} ${team2} ${getLogoHTML(team2)}</div>
-          <div class="grid">${g}</div>
+          <div class="grid ${gridLocked?'locked':''}">${g}</div>
         </div>
       </div>
     </div>
     <div class="stats">
       <span><span class="count">${claimed}</span>/100 claimed</span>
       <span>${yourLbl}</span>
+      ${locked?'<span style="color:var(--red)">🔒 Locked</span>':'<span style="color:var(--green)">🟢 Open</span>'}
     </div>
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch swatch-open"></div>Open</div>
@@ -526,6 +683,7 @@ function renderGame(){
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn-gif" onclick="openGifPicker()" title="Send a GIF">GIF</button>
           <button onclick="sendChat()">Send</button>
         </div>
       </div></div>
@@ -535,28 +693,45 @@ function renderGame(){
     <div class="admin-section" style="margin-top:16px">
       <div class="admin-toggle"><button onclick="toggleAdmin()">⚙️ Admin Panel</button></div>
       <div class="admin-panel ${adminOpen?'open':''}">
+
+        <h3>🎮 Game Status</h3>
+        <button class="game-lock-btn ${locked?'is-locked':'is-open'}" onclick="toggleGameLock()">
+          ${locked?'🔓 OPEN GAME — Let Players Claim Squares':'🔒 LOCK GAME — Stop Square Claims'}
+        </button>
+        <div class="game-status">
+          <span class="status-dot ${locked?'off':'live'}"></span>
+          <span style="color:${locked?'var(--red)':'var(--green)'};font-weight:600">${locked?'Game is LOCKED':'Game is LIVE'}</span>
+        </div>
+        <div class="settings-checklist">${checklistHTML}</div>
+
+        <hr class="admin-divider">
         <h3>⚙️ Teams</h3>
         <div class="admin-row"><label>Team 1:</label><input type="text" id="edit_team1" value="${team1}" maxlength="30"></div>
         <div class="admin-row"><label>Team 2:</label><input type="text" id="edit_team2" value="${team2}" maxlength="30"></div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button></div>
+
         <hr class="admin-divider">
         <h3>💰 Game Settings</h3>
         <div class="admin-row"><label># Participants:</label><input type="number" id="edit_num_participants" value="${state.config.numParticipants||''}" min="0"></div>
         <div class="admin-row"><label>$ Per Person:</label><input type="number" id="edit_cost_per_person" value="${state.config.costPerPerson||''}" min="0"></div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveGameSettings()">Save</button></div>
         ${hasMoney?`<p class="admin-msg">Pot: ${fmt$(pay.totalPot)} → Draws: ${fmt$(pay.randomTotal)} | Q1-3: ${fmt$(pay.q1)} ea | Q4: ${fmt$(pay.q4)}</p>`:''}
+
         <hr class="admin-divider">
         <h3>🎯 Square Limits</h3>
         <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
+
         <hr class="admin-divider">
         <h3>🎲 Random Draws</h3>
         <p class="admin-msg" style="margin-bottom:6px">${fmt$(RANDOM_PRIZE)} each.</p>
         <div class="random-draws">
           ${['q1','q2','q3','q4'].map(q=>`<div class="draw-row"><span class="draw-label">${ql[q]}:</span><span class="draw-winner">${state.randomWinners[q]||'—'}</span><button class="btn-admin btn-green" onclick="drawRandomWinner('${q}')">🎲 Draw</button></div>`).join('')}
         </div>
+
         <hr class="admin-divider">
         <div class="admin-row"><button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>${state.config.numbersAssigned?'Numbers Assigned':'🎲 Randomize Numbers'}</button></div>
         ${state.config.numbersAssigned?'<p class="admin-msg">Locked. Reset to re-randomize.</p>':`<p class="admin-msg">${100-claimed} squares left.</p>`}
+
         <hr class="admin-divider">
         <h3>📊 Scores</h3>
         <div class="score-inputs">
@@ -564,6 +739,7 @@ function renderGame(){
           ${si}
         </div>
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveScores()">💾 Save Scores</button></div>
+
         <hr class="admin-divider">
         <div class="admin-row"><button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Game</button></div>
       </div>
@@ -576,6 +752,7 @@ function joinGame(){
 }
 function toggleAdmin(){adminOpen=!adminOpen;render()}
 function toggleRules(){rulesOpen=!rulesOpen;render()}
+function toggleParticipants(){participantsOpen=!participantsOpen;render()}
 function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
