@@ -187,6 +187,8 @@ input{font-family:inherit;outline:none}
 .draw-row .draw-label{min-width:36px;font-weight:600;color:var(--muted)}
 .draw-row .draw-winner{color:var(--gold);font-weight:600;flex:1;min-width:60px}
 
+#confettiCanvas{position:fixed;inset:0;z-index:150;pointer-events:none}
+
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:var(--green);color:var(--green)}
@@ -211,11 +213,15 @@ input{font-family:inherit;outline:none}
   .grid{gap:1px}
   .grid-cell{font-size:6px;border-radius:2px}
 }
+/* Confetti */
+.confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:150}
+
 </style>
 </head>
 <body>
 
 <div id="app"></div>
+<canvas id="confettiCanvas" class="confetti-canvas"></canvas>
 <div id="gifOverlay"></div>
 <div id="toast" class="toast"></div>
 
@@ -259,14 +265,14 @@ const TEAM_LOGOS = {
 };
 
 const TEAM_COLORS = {
-  "Patriots":"#002244","Seahawks":"#69BE28","Chiefs":"#E31837","Eagles":"#004C54",
-  "49ers":"#AA0000","Ravens":"#241773","Lions":"#0076B6","Cowboys":"#041E42",
-  "Bills":"#00338D","Packers":"#203731","Dolphins":"#008E97","Steelers":"#FFB612",
-  "Bengals":"#FB4F14","Jets":"#125740","Giants":"#0B2265","Broncos":"#FB4F14",
-  "Raiders":"#A5ACAF","Chargers":"#0080C6","Rams":"#003594","Cardinals":"#97233F",
-  "Texans":"#03202F","Colts":"#002C5F","Titans":"#0C2340","Jaguars":"#006778",
-  "Browns":"#311D00","Vikings":"#4F2683","Bears":"#0B162A","Saints":"#D3BC8D",
-  "Falcons":"#A71930","Buccaneers":"#D50A0A","Panthers":"#0085CA","Commanders":"#5A1414"
+  "Patriots":"#B0B7C3","Seahawks":"#69BE28","Chiefs":"#E31837","Eagles":"#A5D6A7",
+  "49ers":"#E57373","Ravens":"#9575CD","Lions":"#4FC3F7","Cowboys":"#90A4AE",
+  "Bills":"#5C9CE6","Packers":"#66BB6A","Dolphins":"#4DD0C8","Steelers":"#FFD54F",
+  "Bengals":"#FB8C00","Jets":"#66BB6A","Giants":"#5C7CFA","Broncos":"#FF8A65",
+  "Raiders":"#B0BEC5","Chargers":"#4FC3F7","Rams":"#5C7CFA","Cardinals":"#E57373",
+  "Texans":"#5C9CE6","Colts":"#5C9CE6","Titans":"#4FC3F7","Jaguars":"#4DD0C8",
+  "Browns":"#FF8A65","Vikings":"#B39DDB","Bears":"#FF8A65","Saints":"#D3BC8D",
+  "Falcons":"#E57373","Buccaneers":"#EF5350","Panthers":"#4FC3F7","Commanders":"#C97C7C"
 };
 
 function getLogoHTML(t){const u=TEAM_LOGOS[t];return u?`<img src="${u}" alt="${t}">`:''}
@@ -800,9 +806,168 @@ function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.fl
 function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
 
 // Register on load if already signed in
+// ── Confetti ──
+const celebratedWinners = new Set();
+let confettiReady = false;
+// After first render, mark existing winners so we don't confetti on load
+setTimeout(()=>{
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const w=getWinner(q);
+    if(w&&w.player&&w.player!=='Unclaimed')celebratedWinners.add('score_'+q);
+    if(state.randomWinners[q])celebratedWinners.add('draw_'+q);
+  });
+  confettiReady=true;
+},2500);
+
+function launchConfetti(){
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#FBBF24','#3B82F6','#10B981','#EF4444','#A855F7','#F97316','#EC4899','#fff'];
+  const pieces = [];
+  for(let i=0;i<150;i++){
+    pieces.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height*-1,
+      w:Math.random()*10+5,
+      h:Math.random()*6+3,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      vx:(Math.random()-0.5)*4,
+      vy:Math.random()*4+2,
+      rot:Math.random()*360,
+      rotV:(Math.random()-0.5)*8,
+      opacity:1
+    });
+  }
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive=false;
+    pieces.forEach(p=>{
+      if(p.opacity<=0)return;
+      alive=true;
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.08;
+      p.rot+=p.rotV;
+      if(frame>60)p.opacity-=0.008;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.globalAlpha=Math.max(0,p.opacity);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    frame++;
+    if(alive&&frame<300)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  requestAnimationFrame(draw);
+}
+
+function checkForNewWinners(){
+  if(!confettiReady)return;
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const w=getWinner(q);
+    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners.has('score_'+q)){
+      celebratedWinners.add('score_'+q);
+      launchConfetti();
+      showToast(`🏆 ${w.player} wins ${q.toUpperCase()}!`,'success');
+    }
+    const rw=state.randomWinners[q];
+    if(rw&&!celebratedWinners.has('draw_'+q)){
+      celebratedWinners.add('draw_'+q);
+      launchConfetti();
+    }
+  });
+}
+
+// Hook into render to check winners
+const _origRender = render;
+render = function(){
+  _origRender();
+  checkForNewWinners();
+};
+
 initGame();setupListeners();
 if(player)registerPlayer();
 render();
+
+// ── Confetti ──
+const confettiCanvas=document.getElementById('confettiCanvas');
+const confettiCtx=confettiCanvas.getContext('2d');
+let confettiPieces=[];
+let confettiRunning=false;
+const CONFETTI_COLORS=['#FBBF24','#3B82F6','#10B981','#EF4444','#A78BFA','#F472B6','#FB923C','#34D399','#60A5FA','#FFFFFF'];
+
+function resizeConfetti(){confettiCanvas.width=window.innerWidth;confettiCanvas.height=window.innerHeight}
+window.addEventListener('resize',resizeConfetti);
+resizeConfetti();
+
+function launchConfetti(dur=4000){
+  const start=Date.now();
+  for(let i=0;i<160;i++){
+    confettiPieces.push({
+      x:Math.random()*confettiCanvas.width,
+      y:-20-Math.random()*confettiCanvas.height*0.5,
+      w:Math.random()*8+4,h:Math.random()*4+2,
+      color:CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
+      vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,
+      rot:Math.random()*360,rotV:(Math.random()-0.5)*10,
+      opacity:1,delay:Math.random()*800,start
+    });
+  }
+  if(!confettiRunning){confettiRunning=true;tickConfetti(dur)}
+}
+
+function tickConfetti(dur){
+  const now=Date.now();
+  confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  confettiPieces=confettiPieces.filter(p=>{
+    const el=now-p.start;
+    if(el<p.delay)return true;
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.04;p.rot+=p.rotV;
+    const fadeAt=dur*0.7;
+    if(el>fadeAt)p.opacity=Math.max(0,1-(el-fadeAt)/(dur-fadeAt));
+    if(p.opacity<=0||p.y>confettiCanvas.height+50)return false;
+    confettiCtx.save();
+    confettiCtx.translate(p.x,p.y);
+    confettiCtx.rotate(p.rot*Math.PI/180);
+    confettiCtx.globalAlpha=p.opacity;
+    confettiCtx.fillStyle=p.color;
+    confettiCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    confettiCtx.restore();
+    return true;
+  });
+  if(confettiPieces.length>0){requestAnimationFrame(()=>tickConfetti(dur))}
+  else{confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);confettiRunning=false}
+}
+
+// Track celebrated winners so we don't repeat
+let celebratedWinners=new Set();
+
+function checkNewWinners(){
+  const ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const w=getWinner(q);
+    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners.has(q)){
+      celebratedWinners.add(q);
+      launchConfetti(q==='q4'?6000:4000);
+      setTimeout(()=>showToast(`🏆 ${ql[q]} WINNER: ${w.player}!`,'success'),300);
+    }
+  });
+}
+
+// Re-hook scores to also check winners
+db.ref('game/scores').off('value');
+db.ref('game/scores').on('value',s=>{
+  if(s.exists())state.scores={...state.scores,...s.val()};
+  else state.scores={q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
+  render();
+  setTimeout(checkNewWinners,200);
+});
 </script>
 </body>
 </html>
