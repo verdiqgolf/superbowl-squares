@@ -258,7 +258,19 @@ const TEAM_LOGOS = {
   "Panthers":"https://a.espncdn.com/i/teamlogos/nfl/500/car.png","Commanders":"https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png"
 };
 
+const TEAM_COLORS = {
+  "Patriots":"#002244","Seahawks":"#69BE28","Chiefs":"#E31837","Eagles":"#004C54",
+  "49ers":"#AA0000","Ravens":"#241773","Lions":"#0076B6","Cowboys":"#041E42",
+  "Bills":"#00338D","Packers":"#203731","Dolphins":"#008E97","Steelers":"#FFB612",
+  "Bengals":"#FB4F14","Jets":"#125740","Giants":"#0B2265","Broncos":"#FB4F14",
+  "Raiders":"#A5ACAF","Chargers":"#0080C6","Rams":"#003594","Cardinals":"#97233F",
+  "Texans":"#03202F","Colts":"#002C5F","Titans":"#0C2340","Jaguars":"#006778",
+  "Browns":"#311D00","Vikings":"#4F2683","Bears":"#0B162A","Saints":"#D3BC8D",
+  "Falcons":"#A71930","Buccaneers":"#D50A0A","Panthers":"#0085CA","Commanders":"#5A1414"
+};
+
 function getLogoHTML(t){const u=TEAM_LOGOS[t];return u?`<img src="${u}" alt="${t}">`:''}
+function getTeamColor(t){return TEAM_COLORS[t]||null}
 
 let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
@@ -679,9 +691,9 @@ function renderGame(){
     ${partsHTML}
     <div class="grid-section">
       <div class="grid-wrapper">
-        <div class="team-label-top">${getLogoHTML(team1)} ${team1} ${getLogoHTML(team1)}</div>
+        <div class="team-label-top" style="${getTeamColor(team1)?'color:'+getTeamColor(team1):''}">${getLogoHTML(team1)} ${team1} ${getLogoHTML(team1)}</div>
         <div class="grid-outer">
-          <div class="team-label-left">${getLogoHTML(team2)} ${team2} ${getLogoHTML(team2)}</div>
+          <div class="team-label-left" style="${getTeamColor(team2)?'color:'+getTeamColor(team2):''}">${getLogoHTML(team2)} ${team2} ${getLogoHTML(team2)}</div>
           <div class="grid ${gridLocked?'locked':''}">${g}</div>
         </div>
       </div>
