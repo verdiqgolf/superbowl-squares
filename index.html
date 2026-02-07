@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Bowl Squares</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1120;--bg2:#141C2F;--bg3:#1C2540;--bg4:#253050;
+  --border:#2A3450;--accent:#3B82F6;--green:#10B981;--gold:#FBBF24;
+  --red:#EF4444;--text:#F1F5F9;--muted:#8492A6;--dim:#4A5568;
+  --cell-size:clamp(32px,8vw,56px);
+  --num-size:clamp(24px,5vw,40px);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input{font-family:inherit;outline:none}
+
+.signin-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.signin-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:48px 40px;max-width:400px;width:100%;text-align:center}
+.signin-card h1{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;line-height:1;margin-bottom:4px}
+.signin-card .subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
+.signin-card input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;margin-bottom:16px;transition:border .2s}
+.signin-card input:focus{border-color:var(--accent)}
+.signin-card .btn-join{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;font-size:16px;font-weight:600;transition:background .2s}
+.signin-card .btn-join:hover{background:#2563EB}
+.signin-card .btn-join:disabled{opacity:.4;cursor:not-allowed}
+.emoji-football{font-size:56px;margin-bottom:16px;display:block}
+
+.header{text-align:center;padding:24px 16px 0}
+.header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,52px);letter-spacing:3px;line-height:1}
+.header .user-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;font-size:14px;color:var(--muted)}
+.header .user-bar .name{color:var(--green);font-weight:600}
+.header .user-bar button{background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:0}
+
+.scoreboard{max-width:600px;margin:20px auto;padding:0 16px}
+.score-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;font-size:clamp(13px,2.5vw,15px);border-bottom:1px solid var(--border)}
+.score-row:last-child{border:none}
+.score-row .qlabel{width:40px;text-align:center;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+.score-row .team{width:100px;font-weight:600;text-align:right}
+.score-row .team.t2{text-align:left}
+.score-row .score-num{min-width:32px;text-align:center;font-weight:700;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)}
+.score-row .dash{color:var(--dim)}
+.score-row.winner-row{background:rgba(251,191,36,.08);border-radius:8px}
+.score-row .winner-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
+
+.grid-section{display:flex;flex-direction:column;align-items:center;padding:12px 8px 32px}
+.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px}
+.grid-outer{display:flex;align-items:flex-start}
+.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center}
+.grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
+.num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,2.5vw,20px);color:var(--muted);border-radius:4px}
+.num-cell.assigned{color:var(--text);font-weight:700}
+.corner-cell{background:transparent}
+.grid-cell{display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:4px;cursor:pointer;transition:all .15s;font-size:clamp(8px,1.6vw,12px);font-weight:500;color:var(--muted);text-align:center;overflow:hidden;padding:1px;line-height:1.1}
+.grid-cell:hover:not(.claimed){background:var(--bg4)}
+.grid-cell.claimed{background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--text)}
+.grid-cell.yours{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 12px rgba(251,191,36,.1)}
+
+.stats{display:flex;gap:16px;justify-content:center;margin-top:16px;font-size:13px;color:var(--muted)}
+.stats span{background:var(--bg2);padding:6px 14px;border-radius:8px;border:1px solid var(--border)}
+.stats .count{color:var(--text);font-weight:600}
+
+.admin-section{max-width:500px;margin:0 auto 40px;padding:0 16px}
+.admin-toggle{display:flex;justify-content:center;margin-bottom:12px}
+.admin-toggle button{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:8px 20px;border-radius:8px;font-size:13px;transition:all .2s}
+.admin-toggle button:hover{border-color:var(--accent);color:var(--text)}
+.admin-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;display:none}
+.admin-panel.open{display:block}
+.admin-panel h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px}
+.admin-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.admin-row label{font-size:13px;color:var(--muted);min-width:70px}
+.admin-row input{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;width:140px}
+.admin-row input[type="number"]{width:70px}
+.btn-admin{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#2563EB}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:#F59E0B}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#DC2626}
+.btn-admin:disabled{opacity:.4;cursor:not-allowed}
+.admin-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.admin-msg{font-size:12px;color:var(--muted);margin-top:4px}
+.score-inputs{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:12px}
+.score-inputs .ql{font-size:13px;font-weight:600;color:var(--muted)}
+.score-inputs input{padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;width:100%}
+.score-inputs .btn-admin{white-space:nowrap}
+
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-swatch{width:14px;height:14px;border-radius:3px}
+.swatch-yours{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4)}
+.swatch-claimed{background:var(--bg3);border:1px solid var(--border)}
+.swatch-winner{background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4)}
+.swatch-open{background:var(--bg3);border:1px dashed var(--dim)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+@media(max-width:600px){
+  .signin-card{padding:32px 24px}
+  .grid-section{overflow-x:auto;align-items:flex-start;padding-left:4px}
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCR230AvhEpF5hfMWuqtsPbJpi298C2hyY",
+  authDomain: "super-bowl-squares-a7d14.firebaseapp.com",
+  databaseURL: "https://super-bowl-squares-a7d14-default-rtdb.firebaseio.com",
+  projectId: "super-bowl-squares-a7d14",
+  storageBucket: "super-bowl-squares-a7d14.firebasestorage.app",
+  messagingSenderId: "108206314478",
+  appId: "1:108206314478:web:3f7577f034b7ce3a9774ff"
+};
+
+const DEFAULT_TEAM1 = "Patriots";
+const DEFAULT_TEAM2 = "Seahawks";
+
+let player = localStorage.getItem('sbsq_player') || null;
+let adminOpen = false;
+let state = {
+  config: { team1: DEFAULT_TEAM1, team2: DEFAULT_TEAM2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
+  scores: { q1_t1: null, q1_t2: null, q2_t1: null, q2_t2: null, q3_t1: null, q3_t2: null, q4_t1: null, q4_t2: null },
+  squares: {}
+};
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
+
+function initGame() {
+  db.ref('game/config').once('value', snap => {
+    if (!snap.exists()) {
+      db.ref('game/config').set(state.config);
+    }
+  });
+}
+
+function setupListeners() {
+  db.ref('game/config').on('value', snap => {
+    if (snap.exists()) {
+      state.config = { ...state.config, ...snap.val() };
+      if (state.config.colNumbers && !Array.isArray(state.config.colNumbers)) {
+        state.config.colNumbers = Object.values(state.config.colNumbers);
+      }
+      if (state.config.rowNumbers && !Array.isArray(state.config.rowNumbers)) {
+        state.config.rowNumbers = Object.values(state.config.rowNumbers);
+      }
+    }
+    render();
+  });
+
+  db.ref('game/scores').on('value', snap => {
+    if (snap.exists()) state.scores = { ...state.scores, ...snap.val() };
+    else state.scores = { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null };
+    render();
+  });
+
+  db.ref('game/squares').on('value', snap => {
+    state.squares = snap.exists() ? snap.val() : {};
+    render();
+  });
+}
+
+function claimSquare(row, col) {
+  const key = `r${row}c${col}`;
+  if (state.squares[key]) return;
+  if (!confirm(`Claim square (row ${row+1}, col ${col+1})?`)) return;
+  db.ref(`game/squares/${key}`).transaction(current => {
+    if (current) return;
+    return player;
+  }, (error, committed) => {
+    if (error) showToast('Error claiming square', 'error');
+    else if (!committed) showToast('Square was just claimed by someone else!', 'error');
+    else showToast('Square claimed!', 'success');
+  });
+}
+
+function randomizeNumbers() {
+  const claimed = Object.keys(state.squares).length;
+  if (claimed < 100) {
+    if (!confirm(`Only ${claimed}/100 squares claimed. Randomize anyway?`)) return;
+  }
+  const colNums = shuffle([0,1,2,3,4,5,6,7,8,9]);
+  const rowNums = shuffle([0,1,2,3,4,5,6,7,8,9]);
+  db.ref('game/config').update({ numbersAssigned: true, colNumbers: colNums, rowNumbers: rowNums });
+  showToast('Numbers randomized!', 'success');
+}
+
+function saveScores() {
+  const vals = {};
+  ['q1','q2','q3','q4'].forEach(q => {
+    const t1 = document.getElementById(`${q}_t1`);
+    const t2 = document.getElementById(`${q}_t2`);
+    vals[`${q}_t1`] = t1 && t1.value !== '' ? parseInt(t1.value) : null;
+    vals[`${q}_t2`] = t2 && t2.value !== '' ? parseInt(t2.value) : null;
+  });
+  db.ref('game/scores').set(vals);
+  showToast('Scores saved!', 'success');
+}
+
+function saveTeams() {
+  const t1 = document.getElementById('edit_team1').value.trim();
+  const t2 = document.getElementById('edit_team2').value.trim();
+  if (t1) db.ref('game/config/team1').set(t1);
+  if (t2) db.ref('game/config/team2').set(t2);
+  showToast('Teams updated!', 'success');
+}
+
+function resetGame() {
+  if (!confirm('Reset EVERYTHING? All squares, numbers, and scores will be erased.')) return;
+  if (!confirm('Are you really sure? This cannot be undone.')) return;
+  db.ref('game').set({
+    config: { team1: state.config.team1, team2: state.config.team2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
+    scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
+    squares: {}
+  });
+  showToast('Game reset!', 'success');
+}
+
+function getWinner(q) {
+  const t1Score = state.scores[`${q}_t1`];
+  const t2Score = state.scores[`${q}_t2`];
+  if (t1Score === null || t2Score === null || !state.config.numbersAssigned) return null;
+  const t1Digit = t1Score % 10;
+  const t2Digit = t2Score % 10;
+  const col = state.config.colNumbers.indexOf(t1Digit);
+  const row = state.config.rowNumbers.indexOf(t2Digit);
+  if (col === -1 || row === -1) return null;
+  return { row, col, player: state.squares[`r${row}c${col}`] || 'Unclaimed' };
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (!player) { app.innerHTML = renderSignIn(); return; }
+  app.innerHTML = renderGame();
+}
+
+function renderSignIn() {
+  return `
+    <div class="signin-wrap">
+      <div class="signin-card">
+        <span class="emoji-football">🏈</span>
+        <h1>SUPER BOWL SQUARES</h1>
+        <p class="subtitle">Enter your name to join the game</p>
+        <input type="text" id="playerName" placeholder="Your name" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
+        <button class="btn-join" onclick="joinGame()">Join Game</button>
+      </div>
+    </div>`;
+}
+
+function renderGame() {
+  const { team1, team2 } = state.config;
+  const claimed = Object.keys(state.squares).length;
+  const yourCount = Object.values(state.squares).filter(v => v === player).length;
+  const winners = {};
+  ['q1','q2','q3','q4'].forEach(q => { winners[q] = getWinner(q); });
+  const winnerCells = new Set();
+  Object.values(winners).forEach(w => { if (w) winnerCells.add(`r${w.row}c${w.col}`); });
+
+  let scoreboardHTML = '';
+  const qLabels = {q1:'Q1',q2:'Q2',q3:'Q3',q4:'Q4/F'};
+  ['q1','q2','q3','q4'].forEach(q => {
+    const t1 = state.scores[`${q}_t1`];
+    const t2 = state.scores[`${q}_t2`];
+    const w = winners[q];
+    const isWinner = w && w.player;
+    scoreboardHTML += `
+      <div class="score-row ${isWinner ? 'winner-row' : ''}">
+        <span class="team">${team1}</span>
+        <span class="score-num">${t1 !== null ? t1 : '–'}</span>
+        <span class="qlabel">${qLabels[q]}</span>
+        <span class="score-num">${t2 !== null ? t2 : '–'}</span>
+        <span class="team t2">${team2}</span>
+        ${isWinner ? `<span class="winner-badge">🏆 ${w.player}</span>` : ''}
+      </div>`;
+  });
+
+  let gridHTML = '<div class="corner-cell num-cell"></div>';
+  for (let c = 0; c < 10; c++) {
+    const num = state.config.numbersAssigned ? state.config.colNumbers[c] : '?';
+    gridHTML += `<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${num}</div>`;
+  }
+  for (let r = 0; r < 10; r++) {
+    const rNum = state.config.numbersAssigned ? state.config.rowNumbers[r] : '?';
+    gridHTML += `<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${rNum}</div>`;
+    for (let c = 0; c < 10; c++) {
+      const key = `r${r}c${c}`;
+      const owner = state.squares[key];
+      const isYours = owner === player;
+      const isWin = winnerCells.has(key);
+      let cls = 'grid-cell';
+      if (isWin) cls += ' winner';
+      else if (isYours) cls += ' yours';
+      else if (owner) cls += ' claimed';
+      const clickAttr = owner ? '' : `onclick="claimSquare(${r},${c})"`;
+      gridHTML += `<div class="${cls}" ${clickAttr} title="${owner || 'Open'}">${owner || ''}</div>`;
+    }
+  }
+
+  let scoreInputsHTML = '';
+  ['q1','q2','q3','q4'].forEach(q => {
+    const t1 = state.scores[`${q}_t1`];
+    const t2 = state.scores[`${q}_t2`];
+    scoreInputsHTML += `
+      <span class="ql">${qLabels[q]}</span>
+      <input type="number" id="${q}_t1" placeholder="${team1}" value="${t1 !== null ? t1 : ''}" min="0">
+      <input type="number" id="${q}_t2" placeholder="${team2}" value="${t2 !== null ? t2 : ''}" min="0">
+      <span></span>`;
+  });
+
+  return `
+    <div class="header">
+      <h1>🏈 SUPER BOWL SQUARES</h1>
+      <div class="user-bar">
+        Playing as <span class="name">${player}</span>
+        <button onclick="signOut()">Switch player</button>
+      </div>
+    </div>
+    <div class="scoreboard">${scoreboardHTML}</div>
+    <div class="grid-section">
+      <div class="team-label-top">← ${team1} →</div>
+      <div class="grid-outer">
+        <div class="team-label-left">← ${team2} →</div>
+        <div class="grid">${gridHTML}</div>
+      </div>
+    </div>
+    <div class="stats">
+      <span><span class="count">${claimed}</span>/100 claimed</span>
+      <span>You: <span class="count">${yourCount}</span></span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch swatch-open"></div>Open</div>
+      <div class="legend-item"><div class="legend-swatch swatch-yours"></div>Yours</div>
+      <div class="legend-item"><div class="legend-swatch swatch-claimed"></div>Claimed</div>
+      <div class="legend-item"><div class="legend-swatch swatch-winner"></div>Winner</div>
+    </div>
+    <div class="admin-section" style="margin-top:32px">
+      <div class="admin-toggle">
+        <button onclick="toggleAdmin()">⚙️ Admin Panel</button>
+      </div>
+      <div class="admin-panel ${adminOpen?'open':''}">
+        <h3>⚙️ Game Admin</h3>
+        <div class="admin-row">
+          <label>Team 1:</label>
+          <input type="text" id="edit_team1" value="${team1}" maxlength="30">
+        </div>
+        <div class="admin-row">
+          <label>Team 2:</label>
+          <input type="text" id="edit_team2" value="${team2}" maxlength="30">
+        </div>
+        <div class="admin-row">
+          <button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button>
+        </div>
+        <hr class="admin-divider">
+        <div class="admin-row">
+          <button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>
+            🎲 ${state.config.numbersAssigned ? 'Numbers Assigned' : 'Randomize Numbers'}
+          </button>
+        </div>
+        ${state.config.numbersAssigned ? '<p class="admin-msg">Numbers are locked. Reset game to re-randomize.</p>' : `<p class="admin-msg">${100-claimed} squares remaining before recommended randomization.</p>`}
+        <hr class="admin-divider">
+        <h3>📊 Enter Scores</h3>
+        <div class="score-inputs">
+          <span></span><span class="ql" style="text-align:center;font-size:12px">${team1}</span><span class="ql" style="text-align:center;font-size:12px">${team2}</span><span></span>
+          ${scoreInputsHTML}
+        </div>
+        <div class="admin-row">
+          <button class="btn-admin btn-primary" onclick="saveScores()">💾 Save Scores</button>
+        </div>
+        <hr class="admin-divider">
+        <div class="admin-row">
+          <button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Entire Game</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function joinGame() {
+  const input = document.getElementById('playerName');
+  const name = input.value.trim();
+  if (!name) return;
+  player = name;
+  localStorage.setItem('sbsq_player', player);
+  render();
+}
+
+function signOut() {
+  player = null;
+  localStorage.removeItem('sbsq_player');
+  render();
+}
+
+function toggleAdmin() {
+  adminOpen = !adminOpen;
+  render();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(() => el.className = 'toast', 2500);
+}
+
+initGame();
+setupListeners();
+render();
+</script>
+</body>
+</html>
