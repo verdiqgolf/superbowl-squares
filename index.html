@@ -34,7 +34,6 @@ input{font-family:inherit;outline:none}
 .header .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
 
-/* Lock banner */
 .lock-banner{max-width:600px;margin:12px auto;padding:0 12px}
 .lock-banner-inner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 20px;text-align:center}
 .lock-banner-inner .lock-icon{font-size:28px;margin-bottom:4px}
@@ -126,6 +125,7 @@ input{font-family:inherit;outline:none}
 .chat-input-row button{padding:10px 14px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
 .chat-input-row button:active{transform:scale(.97)}
 .btn-gif{background:var(--bg4) !important;color:var(--text) !important;font-size:16px !important;padding:10px 12px !important}
+.btn-gif.disabled{opacity:.35;cursor:not-allowed}
 .chat-empty{text-align:center;color:var(--dim);font-size:13px;padding:40px 0;font-style:italic}
 .chat-unread{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:8px}
 
@@ -153,6 +153,7 @@ input{font-family:inherit;outline:none}
 .admin-row label{font-size:13px;color:var(--muted);min-width:110px}
 .admin-row input{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;width:110px}
 .admin-row input[type="number"]{width:70px}
+.admin-row input.wide{width:100%;max-width:280px}
 .btn-admin{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;transition:all .15s}
 .btn-admin:active{transform:scale(.96)}
 .btn-primary{background:var(--accent);color:#fff}
@@ -173,7 +174,7 @@ input{font-family:inherit;outline:none}
 .status-dot.off{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .settings-checklist{margin-top:10px;font-size:12px}
-.settings-checklist .check-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.check-row{display:flex;align-items:center;gap:6px;padding:3px 0}
 .check-row .check-icon{font-size:14px;width:18px;text-align:center}
 .check-row.done{color:var(--green)}
 .check-row.missing{color:var(--muted)}
@@ -232,7 +233,7 @@ const FIREBASE_CONFIG = {
   appId: "1:108206314478:web:3f7577f034b7ce3a9774ff"
 };
 
-const GIPHY_KEY = "dc6zaTOxFJmzC";
+const GIPHY_KEY_DEFAULT = "Ilu6ktUxQSmIAGW5bcg0fpBSu6F3Ngwo";
 const DEFAULT_TEAM1 = "Patriots";
 const DEFAULT_TEAM2 = "Seahawks";
 const ADMIN_NAME = "Sean";
@@ -263,17 +264,18 @@ let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
 let rulesOpen = false;
 let chatOpen = true;
-let participantsOpen = false;
+let participantsOpen = true;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
 let gifSearchTimeout = null;
 
 let state = {
-  config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0,gameLocked:true},
+  config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0,gameLocked:true,giphyKey:''},
   scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
   squares:{},
-  randomWinners:{q1:null,q2:null,q3:null,q4:null}
+  randomWinners:{q1:null,q2:null,q3:null,q4:null},
+  players:{}
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
@@ -283,6 +285,11 @@ function initGame(){
   db.ref('game/config').once('value',s=>{if(!s.exists())db.ref('game/config').set(state.config)});
 }
 
+function registerPlayer(){
+  if(!player)return;
+  db.ref(`game/players/${player}`).set({joinedAt:Date.now()});
+}
+
 function setupListeners(){
   db.ref('game/config').on('value',s=>{
     if(s.exists()){
@@ -290,6 +297,7 @@ function setupListeners(){
       if(state.config.colNumbers&&!Array.isArray(state.config.colNumbers))state.config.colNumbers=Object.values(state.config.colNumbers);
       if(state.config.rowNumbers&&!Array.isArray(state.config.rowNumbers))state.config.rowNumbers=Object.values(state.config.rowNumbers);
       if(state.config.gameLocked===undefined)state.config.gameLocked=true;
+      if(!state.config.giphyKey)state.config.giphyKey='';
     }
     render();
   });
@@ -303,6 +311,10 @@ function setupListeners(){
     state.randomWinners=s.exists()?{q1:null,q2:null,q3:null,q4:null,...s.val()}:{q1:null,q2:null,q3:null,q4:null};
     render();
   });
+  db.ref('game/players').on('value',s=>{
+    state.players=s.exists()?s.val():{};
+    render();
+  });
   db.ref('game/chat').orderByChild('ts').limitToLast(150).on('value',s=>{
     chatMessages=[];
     if(s.exists())s.forEach(c=>{chatMessages.push({id:c.key,...c.val()})});
@@ -314,6 +326,8 @@ function setupListeners(){
 }
 
 function isGameLocked(){return state.config.gameLocked!==false}
+function getGiphyKey(){return(state.config.giphyKey||'').trim()||GIPHY_KEY_DEFAULT}
+function hasGiphyKey(){return!!getGiphyKey()}
 
 function getPayouts(){
   const n=state.config.numParticipants||0,c=state.config.costPerPerson||0;
@@ -323,9 +337,11 @@ function getPayouts(){
 }
 
 function getParticipants(){
-  const counts={};
-  Object.values(state.squares).forEach(n=>{counts[n]=(counts[n]||0)+1});
-  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([name,count])=>({name,count}));
+  // All signed-in players, with square counts
+  const squareCounts={};
+  Object.values(state.squares).forEach(n=>{squareCounts[n]=(squareCounts[n]||0)+1});
+  const allNames=new Set([...Object.keys(state.players),...Object.keys(squareCounts)]);
+  return[...allNames].map(name=>({name,count:squareCounts[name]||0})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name));
 }
 
 function getPlayerCount(n){return Object.values(state.squares).filter(v=>v===n).length}
@@ -411,12 +427,16 @@ function saveGameSettings(){
   const b=parseInt(document.getElementById('edit_cost_per_person').value)||0;
   db.ref('game/config').update({numParticipants:a,costPerPerson:b});showToast('Saved!','success');
 }
+function saveGiphyKey(){
+  const k=document.getElementById('edit_giphy_key').value.trim();
+  db.ref('game/config/giphyKey').set(k);showToast(k?'GIPHY key saved!':'GIPHY key removed','success');
+}
 function resetGame(){
   if(!confirm('Reset EVERYTHING?')||!confirm('Really sure?'))return;
   db.ref('game').set({
-    config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true},
+    config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true,giphyKey:state.config.giphyKey},
     scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
-    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},chat:null
+    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,chat:null
   });
   showToast('Game reset!','success');
 }
@@ -459,6 +479,7 @@ function renderChatMessages(){
 
 // ── GIPHY ──
 function openGifPicker(){
+  if(!hasGiphyKey()){showToast('GIFs not set up yet — ask admin','error');return}
   document.getElementById('gifOverlay').innerHTML=`
     <div class="gif-overlay" onclick="if(event.target===this)closeGifPicker()">
       <div class="gif-picker">
@@ -480,16 +501,20 @@ function onGifSearch(){
 }
 async function loadTrendingGifs(){
   const grid=document.getElementById('gifGrid');if(!grid)return;
+  const key=getGiphyKey();if(!key){grid.innerHTML='<div class="gif-empty">GIPHY API key not configured</div>';return}
   grid.innerHTML='<div class="gif-loading">Loading...</div>';
-  try{const r=await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=20&rating=pg-13`);const d=await r.json();renderGifGrid(d.data)}
-  catch(e){grid.innerHTML='<div class="gif-empty">Failed to load GIFs</div>'}
+  try{const r=await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${encodeURIComponent(key)}&limit=20&rating=pg-13`);
+    if(!r.ok)throw new Error(r.status);const d=await r.json();renderGifGrid(d.data)}
+  catch(e){grid.innerHTML='<div class="gif-empty">Failed to load GIFs — check API key</div>'}
 }
 async function searchGifs(query){
   const grid=document.getElementById('gifGrid');if(!grid)return;
+  const key=getGiphyKey();if(!key)return;
   grid.innerHTML='<div class="gif-loading">Searching...</div>';
-  try{const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=20&rating=pg-13`);const d=await r.json();
+  try{const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${encodeURIComponent(key)}&q=${encodeURIComponent(query)}&limit=20&rating=pg-13`);
+    if(!r.ok)throw new Error(r.status);const d=await r.json();
     if(!d.data.length)grid.innerHTML='<div class="gif-empty">No GIFs found</div>';else renderGifGrid(d.data)}
-  catch(e){grid.innerHTML='<div class="gif-empty">Search failed</div>'}
+  catch(e){grid.innerHTML='<div class="gif-empty">Search failed — check API key</div>'}
 }
 function renderGifGrid(gifs){
   const grid=document.getElementById('gifGrid');if(!grid)return;
@@ -535,6 +560,7 @@ function renderGame(){
   const hasMoney=pay.totalPot>0;
   const isAdmin=player===ADMIN_NAME;
   const participants=getParticipants();
+  const gifReady=hasGiphyKey();
 
   const winners={};
   ['q1','q2','q3','q4'].forEach(q=>{winners[q]=getWinner(q)});
@@ -554,7 +580,7 @@ function renderGame(){
     </div>`;
   });
 
-  // Lock banner for non-admin
+  // Lock banner
   let lockBanner='';
   if(locked&&!isAdmin){
     lockBanner=`<div class="lock-banner"><div class="lock-banner-inner">
@@ -598,11 +624,11 @@ function renderGame(){
       <span class="chevron ${participantsOpen?'open':''}">▼</span>
     </div>
     <div class="collapsible-body ${participantsOpen?'open':''}"><div class="collapsible-inner">
-      ${participants.length===0?'<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">No squares claimed yet</div>'
+      ${participants.length===0?'<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">No players yet</div>'
       :`<div class="participants-list">${participants.map(p=>
         `<div class="participant-chip ${p.name===player?'is-you':''}">
           <span class="p-name">${escapeHTML(p.name)}</span>
-          <span class="p-count">${p.count} sq</span>
+          <span class="p-count">${p.count?p.count+' sq':'joined'}</span>
         </div>`).join('')}</div>`}
     </div></div>
   </div>`;
@@ -639,8 +665,6 @@ function renderGame(){
 
   const yourLbl=max>0?`You: <span class="count ${atLimit?'at-limit':''}">${yourCount}/${max}</span>`:`You: <span class="count">${yourCount}</span>`;
   const unreadBadge=unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
-
-  // Admin checklist
   const checks=getSettingsChecklist();
   const checklistHTML=checks.map(c=>`<div class="check-row ${c.done?'done':'missing'}"><span class="check-icon">${c.done?'✅':'⬜'}</span>${c.label}</div>`).join('');
 
@@ -683,7 +707,7 @@ function renderGame(){
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="btn-gif" onclick="openGifPicker()" title="Send a GIF">GIF</button>
+          <button class="btn-gif ${gifReady?'':'disabled'}" onclick="${gifReady?'openGifPicker()':'showToast(\'GIFs not set up yet\',\'error\')'}" title="${gifReady?'Send a GIF':'Admin needs to add GIPHY API key'}">GIF</button>
           <button onclick="sendChat()">Send</button>
         </div>
       </div></div>
@@ -722,6 +746,12 @@ function renderGame(){
         <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
 
         <hr class="admin-divider">
+        <h3>🎞️ GIPHY</h3>
+        <div class="admin-row"><label>API Key:</label><input type="text" id="edit_giphy_key" class="wide" value="${escapeAttr(state.config.giphyKey||'')}" placeholder="Paste GIPHY API key"></div>
+        <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveGiphyKey()">Save Key</button></div>
+        <p class="admin-msg">Free key → <a href="https://developers.giphy.com/dashboard/?create=true" target="_blank" style="color:var(--accent)">developers.giphy.com</a> → Create App → API option → copy key</p>
+
+        <hr class="admin-divider">
         <h3>🎲 Random Draws</h3>
         <p class="admin-msg" style="margin-bottom:6px">${fmt$(RANDOM_PRIZE)} each.</p>
         <div class="random-draws">
@@ -748,7 +778,7 @@ function renderGame(){
 
 function joinGame(){
   const i=document.getElementById('playerName'),n=i.value.trim();
-  if(!n)return;player=n;localStorage.setItem('sbsq_player',player);render();
+  if(!n)return;player=n;localStorage.setItem('sbsq_player',player);registerPlayer();render();
 }
 function toggleAdmin(){adminOpen=!adminOpen;render()}
 function toggleRules(){rulesOpen=!rulesOpen;render()}
@@ -757,7 +787,10 @@ function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
 
-initGame();setupListeners();render();
+// Register on load if already signed in
+initGame();setupListeners();
+if(player)registerPlayer();
+render();
 </script>
 </body>
 </html>
