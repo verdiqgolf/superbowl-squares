@@ -805,96 +805,6 @@ function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
 
-// Register on load if already signed in
-// ── Confetti ──
-const celebratedWinners = new Set();
-let confettiReady = false;
-// After first render, mark existing winners so we don't confetti on load
-setTimeout(()=>{
-  ['q1','q2','q3','q4'].forEach(q=>{
-    const w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed')celebratedWinners.add('score_'+q);
-    if(state.randomWinners[q])celebratedWinners.add('draw_'+q);
-  });
-  confettiReady=true;
-},2500);
-
-function launchConfetti(){
-  const canvas = document.getElementById('confettiCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const colors = ['#FBBF24','#3B82F6','#10B981','#EF4444','#A855F7','#F97316','#EC4899','#fff'];
-  const pieces = [];
-  for(let i=0;i<150;i++){
-    pieces.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height*-1,
-      w:Math.random()*10+5,
-      h:Math.random()*6+3,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      vx:(Math.random()-0.5)*4,
-      vy:Math.random()*4+2,
-      rot:Math.random()*360,
-      rotV:(Math.random()-0.5)*8,
-      opacity:1
-    });
-  }
-  let frame=0;
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    let alive=false;
-    pieces.forEach(p=>{
-      if(p.opacity<=0)return;
-      alive=true;
-      p.x+=p.vx;
-      p.y+=p.vy;
-      p.vy+=0.08;
-      p.rot+=p.rotV;
-      if(frame>60)p.opacity-=0.008;
-      ctx.save();
-      ctx.translate(p.x,p.y);
-      ctx.rotate(p.rot*Math.PI/180);
-      ctx.globalAlpha=Math.max(0,p.opacity);
-      ctx.fillStyle=p.color;
-      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-      ctx.restore();
-    });
-    frame++;
-    if(alive&&frame<300)requestAnimationFrame(draw);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
-  }
-  requestAnimationFrame(draw);
-}
-
-function checkForNewWinners(){
-  if(!confettiReady)return;
-  ['q1','q2','q3','q4'].forEach(q=>{
-    const w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners.has('score_'+q)){
-      celebratedWinners.add('score_'+q);
-      launchConfetti();
-      showToast(`🏆 ${w.player} wins ${q.toUpperCase()}!`,'success');
-    }
-    const rw=state.randomWinners[q];
-    if(rw&&!celebratedWinners.has('draw_'+q)){
-      celebratedWinners.add('draw_'+q);
-      launchConfetti();
-    }
-  });
-}
-
-// Hook into render to check winners
-const _origRender = render;
-render = function(){
-  _origRender();
-  checkForNewWinners();
-};
-
-initGame();setupListeners();
-if(player)registerPlayer();
-render();
-
 // ── Confetti ──
 const confettiCanvas=document.getElementById('confettiCanvas');
 const confettiCtx=confettiCanvas.getContext('2d');
@@ -906,9 +816,10 @@ function resizeConfetti(){confettiCanvas.width=window.innerWidth;confettiCanvas.
 window.addEventListener('resize',resizeConfetti);
 resizeConfetti();
 
-function launchConfetti(dur=4000){
-  const start=Date.now();
-  for(let i=0;i<160;i++){
+function launchConfetti(dur){
+  dur=dur||4000;
+  var start=Date.now();
+  for(var i=0;i<160;i++){
     confettiPieces.push({
       x:Math.random()*confettiCanvas.width,
       y:-20-Math.random()*confettiCanvas.height*0.5,
@@ -916,21 +827,21 @@ function launchConfetti(dur=4000){
       color:CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
       vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,
       rot:Math.random()*360,rotV:(Math.random()-0.5)*10,
-      opacity:1,delay:Math.random()*800,start
+      opacity:1,delay:Math.random()*800,start:start,dur:dur
     });
   }
-  if(!confettiRunning){confettiRunning=true;tickConfetti(dur)}
+  if(!confettiRunning){confettiRunning=true;tickConfetti()}
 }
 
-function tickConfetti(dur){
-  const now=Date.now();
+function tickConfetti(){
+  var now=Date.now();
   confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-  confettiPieces=confettiPieces.filter(p=>{
-    const el=now-p.start;
+  confettiPieces=confettiPieces.filter(function(p){
+    var el=now-p.start;
     if(el<p.delay)return true;
     p.x+=p.vx;p.y+=p.vy;p.vy+=0.04;p.rot+=p.rotV;
-    const fadeAt=dur*0.7;
-    if(el>fadeAt)p.opacity=Math.max(0,1-(el-fadeAt)/(dur-fadeAt));
+    var fadeAt=p.dur*0.7;
+    if(el>fadeAt)p.opacity=Math.max(0,1-(el-fadeAt)/(p.dur-fadeAt));
     if(p.opacity<=0||p.y>confettiCanvas.height+50)return false;
     confettiCtx.save();
     confettiCtx.translate(p.x,p.y);
@@ -941,33 +852,58 @@ function tickConfetti(dur){
     confettiCtx.restore();
     return true;
   });
-  if(confettiPieces.length>0){requestAnimationFrame(()=>tickConfetti(dur))}
+  if(confettiPieces.length>0){requestAnimationFrame(tickConfetti)}
   else{confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);confettiRunning=false}
 }
 
-// Track celebrated winners so we don't repeat
-let celebratedWinners=new Set();
+// Track celebrated winners so we don't repeat or fire on page load
+var celebratedWinners={};
+var confettiReady=false;
 
 function checkNewWinners(){
-  const ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
-  ['q1','q2','q3','q4'].forEach(q=>{
-    const w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners.has(q)){
-      celebratedWinners.add(q);
+  if(!confettiReady)return;
+  var ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
+  ['q1','q2','q3','q4'].forEach(function(q){
+    var w=getWinner(q);
+    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners['score_'+q]){
+      celebratedWinners['score_'+q]=true;
       launchConfetti(q==='q4'?6000:4000);
-      setTimeout(()=>showToast(`🏆 ${ql[q]} WINNER: ${w.player}!`,'success'),300);
+      setTimeout(function(){showToast('🏆 '+ql[q]+' WINNER: '+w.player+'!','success')},300);
+    }
+    var rw=state.randomWinners[q];
+    if(rw&&!celebratedWinners['draw_'+q]){
+      celebratedWinners['draw_'+q]=true;
+      launchConfetti(4000);
     }
   });
 }
 
-// Re-hook scores to also check winners
-db.ref('game/scores').off('value');
-db.ref('game/scores').on('value',s=>{
-  if(s.exists())state.scores={...state.scores,...s.val()};
-  else state.scores={q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
+// Hook score updates to trigger confetti
+db.ref('game/scores').on('value',function(s){
+  if(s.exists())state.scores=Object.assign({},state.scores,s.val());
   render();
-  setTimeout(checkNewWinners,200);
+  setTimeout(checkNewWinners,300);
 });
+db.ref('game/randomWinners').on('value',function(s){
+  state.randomWinners=s.exists()?Object.assign({q1:null,q2:null,q3:null,q4:null},s.val()):{q1:null,q2:null,q3:null,q4:null};
+  render();
+  setTimeout(checkNewWinners,300);
+});
+
+// Init
+initGame();setupListeners();
+if(player)registerPlayer();
+render();
+
+// After first data loads, snapshot existing winners so confetti only fires for NEW ones
+setTimeout(function(){
+  ['q1','q2','q3','q4'].forEach(function(q){
+    var w=getWinner(q);
+    if(w&&w.player&&w.player!=='Unclaimed')celebratedWinners['score_'+q]=true;
+    if(state.randomWinners[q])celebratedWinners['draw_'+q]=true;
+  });
+  confettiReady=true;
+},3000);
 </script>
 </body>
 </html>
