@@ -344,7 +344,7 @@ function renderGame() {
       <div class="legend-item"><div class="legend-swatch swatch-claimed"></div>Claimed</div>
       <div class="legend-item"><div class="legend-swatch swatch-winner"></div>Winner</div>
     </div>
-    <div class="admin-section" style="margin-top:32px">
+    <div class="admin-section" style="margin-top:32px;${player !== 'Sean' ? 'display:none' : ''}">
       <div class="admin-toggle">
         <button onclick="toggleAdmin()">⚙️ Admin Panel</button>
       </div>
