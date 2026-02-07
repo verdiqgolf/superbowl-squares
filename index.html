@@ -48,10 +48,9 @@ input{font-family:inherit;outline:none}
 .score-row .winner-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
 
 .grid-section{display:flex;flex-direction:column;align-items:center;padding:12px 8px 32px}
-.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px}
+.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px;padding-left:calc(var(--num-size) + 20px);text-align:center}
 .grid-outer{display:flex;align-items:flex-start}
-.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center}
-.grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
+.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center;padding-bottom:var(--num-size)}.grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
 .num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,2.5vw,20px);color:var(--muted);border-radius:4px}
 .num-cell.assigned{color:var(--text);font-weight:700}
 .corner-cell{background:transparent}
