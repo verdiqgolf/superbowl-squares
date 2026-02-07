@@ -27,14 +27,12 @@ input{font-family:inherit;outline:none}
 .signin-card input:focus{border-color:var(--accent)}
 .signin-card .btn-join{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;font-size:16px;font-weight:600;transition:background .2s}
 .signin-card .btn-join:hover{background:#2563EB}
-.signin-card .btn-join:disabled{opacity:.4;cursor:not-allowed}
 .emoji-football{font-size:56px;margin-bottom:16px;display:block}
 
 .header{text-align:center;padding:24px 16px 0}
 .header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,52px);letter-spacing:3px;line-height:1}
 .header .user-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;font-size:14px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
-.header .user-bar button{background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:0}
 
 .scoreboard{max-width:600px;margin:20px auto;padding:0 16px}
 .score-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;font-size:clamp(13px,2.5vw,15px);border-bottom:1px solid var(--border)}
@@ -43,14 +41,17 @@ input{font-family:inherit;outline:none}
 .score-row .team{width:100px;font-weight:600;text-align:right}
 .score-row .team.t2{text-align:left}
 .score-row .score-num{min-width:32px;text-align:center;font-weight:700;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)}
-.score-row .dash{color:var(--dim)}
 .score-row.winner-row{background:rgba(251,191,36,.08);border-radius:8px}
 .score-row .winner-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
 
 .grid-section{display:flex;flex-direction:column;align-items:center;padding:12px 8px 32px}
-.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px;padding-left:calc(var(--num-size) + 20px);text-align:center}
-.grid-outer{display:flex;align-items:flex-start}
-.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center;padding-bottom:var(--num-size)}.grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
+.grid-wrapper{display:inline-flex;flex-direction:column;align-items:center}
+.team-label-top{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding-left:calc(var(--num-size) + 8px)}
+.team-label-top img{height:clamp(24px,5vw,40px);width:auto;object-fit:contain}
+.grid-outer{display:flex;align-items:stretch}
+.team-label-left{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,4vw,28px);letter-spacing:2px;color:var(--red);writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);margin-right:4px;display:flex;align-items:center;justify-content:center;gap:10px;padding-top:calc(var(--num-size) + 4px)}
+.team-label-left img{height:clamp(24px,5vw,40px);width:auto;object-fit:contain;transform:rotate(90deg)}
+.grid{display:grid;grid-template-columns:var(--num-size) repeat(10,var(--cell-size));grid-template-rows:var(--num-size) repeat(10,var(--cell-size));gap:2px}
 .num-cell{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,2.5vw,20px);color:var(--muted);border-radius:4px}
 .num-cell.assigned{color:var(--text);font-weight:700}
 .corner-cell{background:transparent}
@@ -85,7 +86,6 @@ input{font-family:inherit;outline:none}
 .score-inputs{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:12px}
 .score-inputs .ql{font-size:13px;font-weight:600;color:var(--muted)}
 .score-inputs input{padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;width:100%}
-.score-inputs .btn-admin{white-space:nowrap}
 
 .legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
 .legend-item{display:flex;align-items:center;gap:6px}
@@ -127,12 +127,53 @@ const FIREBASE_CONFIG = {
 
 const DEFAULT_TEAM1 = "Patriots";
 const DEFAULT_TEAM2 = "Seahawks";
+const ADMIN_NAME = "Sean";
+
+const TEAM_LOGOS = {
+  "Patriots": "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png",
+  "Seahawks": "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
+  "Chiefs": "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",
+  "Eagles": "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
+  "49ers": "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
+  "Ravens": "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
+  "Lions": "https://a.espncdn.com/i/teamlogos/nfl/500/det.png",
+  "Cowboys": "https://a.espncdn.com/i/teamlogos/nfl/500/dal.png",
+  "Bills": "https://a.espncdn.com/i/teamlogos/nfl/500/buf.png",
+  "Packers": "https://a.espncdn.com/i/teamlogos/nfl/500/gb.png",
+  "Dolphins": "https://a.espncdn.com/i/teamlogos/nfl/500/mia.png",
+  "Steelers": "https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
+  "Bengals": "https://a.espncdn.com/i/teamlogos/nfl/500/cin.png",
+  "Jets": "https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png",
+  "Giants": "https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png",
+  "Broncos": "https://a.espncdn.com/i/teamlogos/nfl/500/den.png",
+  "Raiders": "https://a.espncdn.com/i/teamlogos/nfl/500/lv.png",
+  "Chargers": "https://a.espncdn.com/i/teamlogos/nfl/500/lac.png",
+  "Rams": "https://a.espncdn.com/i/teamlogos/nfl/500/lar.png",
+  "Cardinals": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
+  "Texans": "https://a.espncdn.com/i/teamlogos/nfl/500/hou.png",
+  "Colts": "https://a.espncdn.com/i/teamlogos/nfl/500/ind.png",
+  "Titans": "https://a.espncdn.com/i/teamlogos/nfl/500/ten.png",
+  "Jaguars": "https://a.espncdn.com/i/teamlogos/nfl/500/jax.png",
+  "Browns": "https://a.espncdn.com/i/teamlogos/nfl/500/cle.png",
+  "Vikings": "https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
+  "Bears": "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png",
+  "Saints": "https://a.espncdn.com/i/teamlogos/nfl/500/no.png",
+  "Falcons": "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
+  "Buccaneers": "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
+  "Panthers": "https://a.espncdn.com/i/teamlogos/nfl/500/car.png",
+  "Commanders": "https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png"
+};
+
+function getLogoHTML(teamName) {
+  const url = TEAM_LOGOS[teamName];
+  return url ? `<img src="${url}" alt="${teamName}">` : '';
+}
 
 let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
 let state = {
   config: { team1: DEFAULT_TEAM1, team2: DEFAULT_TEAM2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
-  scores: { q1_t1: null, q1_t2: null, q2_t1: null, q2_t2: null, q3_t1: null, q3_t2: null, q4_t1: null, q4_t2: null },
+  scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
   squares: {}
 };
 
@@ -141,9 +182,7 @@ const db = firebase.database();
 
 function initGame() {
   db.ref('game/config').once('value', snap => {
-    if (!snap.exists()) {
-      db.ref('game/config').set(state.config);
-    }
+    if (!snap.exists()) db.ref('game/config').set(state.config);
   });
 }
 
@@ -151,22 +190,18 @@ function setupListeners() {
   db.ref('game/config').on('value', snap => {
     if (snap.exists()) {
       state.config = { ...state.config, ...snap.val() };
-      if (state.config.colNumbers && !Array.isArray(state.config.colNumbers)) {
+      if (state.config.colNumbers && !Array.isArray(state.config.colNumbers))
         state.config.colNumbers = Object.values(state.config.colNumbers);
-      }
-      if (state.config.rowNumbers && !Array.isArray(state.config.rowNumbers)) {
+      if (state.config.rowNumbers && !Array.isArray(state.config.rowNumbers))
         state.config.rowNumbers = Object.values(state.config.rowNumbers);
-      }
     }
     render();
   });
-
   db.ref('game/scores').on('value', snap => {
     if (snap.exists()) state.scores = { ...state.scores, ...snap.val() };
     else state.scores = { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null };
     render();
   });
-
   db.ref('game/squares').on('value', snap => {
     state.squares = snap.exists() ? snap.val() : {};
     render();
@@ -218,8 +253,8 @@ function saveTeams() {
 }
 
 function resetGame() {
-  if (!confirm('Reset EVERYTHING? All squares, numbers, and scores will be erased.')) return;
-  if (!confirm('Are you really sure? This cannot be undone.')) return;
+  if (!confirm('Reset EVERYTHING?')) return;
+  if (!confirm('Are you really sure?')) return;
   db.ref('game').set({
     config: { team1: state.config.team1, team2: state.config.team2, numbersAssigned: false, colNumbers: null, rowNumbers: null },
     scores: { q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null },
@@ -232,10 +267,8 @@ function getWinner(q) {
   const t1Score = state.scores[`${q}_t1`];
   const t2Score = state.scores[`${q}_t2`];
   if (t1Score === null || t2Score === null || !state.config.numbersAssigned) return null;
-  const t1Digit = t1Score % 10;
-  const t2Digit = t2Score % 10;
-  const col = state.config.colNumbers.indexOf(t1Digit);
-  const row = state.config.rowNumbers.indexOf(t2Digit);
+  const col = state.config.colNumbers.indexOf(t1Score % 10);
+  const row = state.config.rowNumbers.indexOf(t2Score % 10);
   if (col === -1 || row === -1) return null;
   return { row, col, player: state.squares[`r${row}c${col}`] || 'Unclaimed' };
 }
@@ -319,70 +352,66 @@ function renderGame() {
       <span></span>`;
   });
 
+  const isAdmin = player === ADMIN_NAME;
+
   return `
     <div class="header">
       <h1>🏈 SUPER BOWL SQUARES</h1>
-      <div class="user-bar">
-        Playing as <span class="name">${player}</span>
-      </div>
+      <div class="user-bar">Playing as <span class="name">${player}</span></div>
     </div>
+
     <div class="scoreboard">${scoreboardHTML}</div>
+
     <div class="grid-section">
-      <div class="team-label-top">← ${team1} →</div>
-      <div class="grid-outer">
-        <div class="team-label-left">← ${team2} →</div>
-        <div class="grid">${gridHTML}</div>
+      <div class="grid-wrapper">
+        <div class="team-label-top">${getLogoHTML(team1)} ${team1} ${getLogoHTML(team1)}</div>
+        <div class="grid-outer">
+          <div class="team-label-left">${getLogoHTML(team2)} ${team2} ${getLogoHTML(team2)}</div>
+          <div class="grid">${gridHTML}</div>
+        </div>
       </div>
     </div>
+
     <div class="stats">
       <span><span class="count">${claimed}</span>/100 claimed</span>
       <span>You: <span class="count">${yourCount}</span></span>
     </div>
+
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch swatch-open"></div>Open</div>
       <div class="legend-item"><div class="legend-swatch swatch-yours"></div>Yours</div>
       <div class="legend-item"><div class="legend-swatch swatch-claimed"></div>Claimed</div>
       <div class="legend-item"><div class="legend-swatch swatch-winner"></div>Winner</div>
     </div>
-    <div class="admin-section" style="margin-top:32px;${player !== 'Sean' ? 'display:none' : ''}">
+
+    ${isAdmin ? `
+    <div class="admin-section" style="margin-top:32px">
       <div class="admin-toggle">
         <button onclick="toggleAdmin()">⚙️ Admin Panel</button>
       </div>
       <div class="admin-panel ${adminOpen?'open':''}">
         <h3>⚙️ Game Admin</h3>
-        <div class="admin-row">
-          <label>Team 1:</label>
-          <input type="text" id="edit_team1" value="${team1}" maxlength="30">
-        </div>
-        <div class="admin-row">
-          <label>Team 2:</label>
-          <input type="text" id="edit_team2" value="${team2}" maxlength="30">
-        </div>
-        <div class="admin-row">
-          <button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button>
-        </div>
+        <div class="admin-row"><label>Team 1:</label><input type="text" id="edit_team1" value="${team1}" maxlength="30"></div>
+        <div class="admin-row"><label>Team 2:</label><input type="text" id="edit_team2" value="${team2}" maxlength="30"></div>
+        <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveTeams()">Save Teams</button></div>
         <hr class="admin-divider">
         <div class="admin-row">
           <button class="btn-admin btn-gold" onclick="randomizeNumbers()" ${state.config.numbersAssigned?'disabled':''}>
             🎲 ${state.config.numbersAssigned ? 'Numbers Assigned' : 'Randomize Numbers'}
           </button>
         </div>
-        ${state.config.numbersAssigned ? '<p class="admin-msg">Numbers are locked. Reset game to re-randomize.</p>' : `<p class="admin-msg">${100-claimed} squares remaining before recommended randomization.</p>`}
+        ${state.config.numbersAssigned ? '<p class="admin-msg">Numbers are locked. Reset game to re-randomize.</p>' : `<p class="admin-msg">${100-claimed} squares remaining.</p>`}
         <hr class="admin-divider">
         <h3>📊 Enter Scores</h3>
         <div class="score-inputs">
           <span></span><span class="ql" style="text-align:center;font-size:12px">${team1}</span><span class="ql" style="text-align:center;font-size:12px">${team2}</span><span></span>
           ${scoreInputsHTML}
         </div>
-        <div class="admin-row">
-          <button class="btn-admin btn-primary" onclick="saveScores()">💾 Save Scores</button>
-        </div>
+        <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveScores()">💾 Save Scores</button></div>
         <hr class="admin-divider">
-        <div class="admin-row">
-          <button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Entire Game</button>
-        </div>
+        <div class="admin-row"><button class="btn-admin btn-danger" onclick="resetGame()">🗑️ Reset Entire Game</button></div>
       </div>
-    </div>`;
+    </div>` : ''}`;
 }
 
 function joinGame() {
@@ -391,12 +420,6 @@ function joinGame() {
   if (!name) return;
   player = name;
   localStorage.setItem('sbsq_player', player);
-  render();
-}
-
-function signOut() {
-  player = null;
-  localStorage.removeItem('sbsq_player');
   render();
 }
 
