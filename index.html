@@ -33,10 +33,28 @@ input{font-family:inherit;outline:none}
 .header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,52px);letter-spacing:3px;line-height:1}
 .header .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
+.team-picker{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.team-picker .tp-label{font-size:12px;color:var(--dim)}
+.team-picker .tp-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--border);background:var(--bg2);color:var(--muted);transition:all .15s;cursor:pointer}
+.team-picker .tp-btn:hover{border-color:var(--accent)}
+.team-picker .tp-btn.selected{border-color:currentColor;background:rgba(255,255,255,.08)}
+.team-picker .tp-btn img{height:18px;width:auto}
+.team-badge{display:inline-block;font-size:10px;padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px;vertical-align:middle;line-height:1.4}
 
 .lock-banner{max-width:600px;margin:12px auto;padding:0 12px}
 .lock-banner-inner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 20px;text-align:center}
 .lock-banner-inner .lock-icon{font-size:28px;margin-bottom:4px}
+.countdown-banner{max-width:600px;margin:12px auto;padding:0 12px}
+.countdown-inner{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(168,85,247,.12));border:1px solid rgba(99,102,241,.3);border-radius:12px;padding:16px 20px;text-align:center}
+.countdown-inner .cd-emoji{font-size:28px;margin-bottom:4px}
+.countdown-inner .cd-label{font-size:13px;color:var(--muted);margin-bottom:8px}
+.countdown-inner .cd-timer{display:flex;justify-content:center;gap:12px;margin-bottom:8px}
+.countdown-inner .cd-unit{display:flex;flex-direction:column;align-items:center;min-width:52px}
+.countdown-inner .cd-num{font-size:28px;font-weight:800;color:var(--accent);line-height:1}
+.countdown-inner .cd-lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.countdown-inner .cd-grid-msg{font-size:12px;color:var(--muted);margin-top:4px}
+.countdown-inner .cd-grid-msg strong{color:var(--green)}
+.countdown-inner .cd-live{font-size:15px;font-weight:700;color:var(--green)}
 .lock-banner-inner .lock-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--red);margin-bottom:4px}
 .lock-banner-inner .lock-text{font-size:13px;color:var(--muted)}
 
@@ -266,6 +284,8 @@ const DEFAULT_TEAM2 = "Seahawks";
 const ADMIN_NAME = "Sean";
 const RANDOM_PRIZE = 10;
 const HOUSE_NAME = '🏠 House';
+const KICKOFF_TIME = new Date('2026-02-08T23:30:00Z'); // 6:30 PM ET
+const GRID_OPEN_TIME = new Date(KICKOFF_TIME.getTime() - 30*60*1000); // 30 min before
 
 const TEAM_LOGOS = {
   "Patriots":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png","Seahawks":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
@@ -317,7 +337,8 @@ let state = {
   squares:{},
   randomWinners:{q1:null,q2:null,q3:null,q4:null},
   players:{},
-  payments:{}
+  payments:{},
+  teamPicks:{}
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
@@ -361,6 +382,10 @@ function setupListeners(){
     state.payments=s.exists()?s.val():{};
     render();
   });
+  db.ref('game/teamPicks').on('value',s=>{
+    state.teamPicks=s.exists()?s.val():{};
+    render();
+  });
   db.ref('game/chat').orderByChild('ts').limitToLast(150).on('value',s=>{
     chatMessages=[];
     if(s.exists())s.forEach(c=>{chatMessages.push({id:c.key,...c.val()})});
@@ -369,9 +394,46 @@ function setupListeners(){
     lastChatCount=chatMessages.length;
     renderChatMessages();
   });
+
+  // Countdown ticker — update every second
+  setInterval(()=>{
+    const el=document.getElementById('countdown-timer');
+    if(el)el.innerHTML=buildCountdownContent();
+  },1000);
 }
 
 function isGameLocked(){return state.config.gameLocked!==false}
+
+function buildCountdownContent(){
+  const now=new Date();
+  const kickoffDiff=KICKOFF_TIME-now;
+  const gridDiff=GRID_OPEN_TIME-now;
+  if(kickoffDiff<=0){
+    return`<div class="cd-live">🏈 GAME TIME — GO PATS! 🏈</div>`;
+  }
+  const h=Math.floor(kickoffDiff/3600000);
+  const m=Math.floor((kickoffDiff%3600000)/60000);
+  const s=Math.floor((kickoffDiff%60000)/1000);
+  let gridMsg='';
+  if(gridDiff<=0){
+    gridMsg='<div class="cd-grid-msg"><strong>🟢 Grid is open — pick your squares!</strong></div>';
+  }else{
+    const gm=Math.floor(gridDiff/60000);
+    const gs=Math.floor((gridDiff%60000)/1000);
+    gridMsg=`<div class="cd-grid-msg">Grid opens in <strong>${gm}m ${gs}s</strong> (30 min before kickoff)</div>`;
+  }
+  return`<div class="cd-label">⏱️ Countdown to Super Bowl LX Kickoff</div>
+    <div class="cd-timer">
+      <div class="cd-unit"><span class="cd-num">${String(h).padStart(2,'0')}</span><span class="cd-lbl">hrs</span></div>
+      <div class="cd-unit"><span class="cd-num">${String(m).padStart(2,'0')}</span><span class="cd-lbl">min</span></div>
+      <div class="cd-unit"><span class="cd-num">${String(s).padStart(2,'0')}</span><span class="cd-lbl">sec</span></div>
+    </div>
+    ${gridMsg}`;
+}
+
+function getCountdownHTML(){
+  return`<div class="countdown-banner"><div class="countdown-inner" id="countdown-timer">${buildCountdownContent()}</div></div>`;
+}
 function getGiphyKey(){return(state.config.giphyKey||'').trim()||GIPHY_KEY_DEFAULT}
 function hasGiphyKey(){return!!getGiphyKey()}
 
@@ -483,7 +545,7 @@ function resetGame(){
   db.ref('game').set({
     config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true,giphyKey:state.config.giphyKey},
     scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
-    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,payments:null,chat:null
+    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,payments:null,teamPicks:null,chat:null
   });
   localStorage.removeItem('sbsq_celebrated');
   showToast('Game reset!','success');
@@ -537,6 +599,14 @@ function togglePayment(name){
   db.ref('game/payments/'+name).set(!current);
 }
 
+function pickTeam(team){
+  if(!player)return;
+  const current=state.teamPicks[player];
+  // Toggle off if same team clicked again
+  if(current===team) db.ref('game/teamPicks/'+player).remove();
+  else db.ref('game/teamPicks/'+player).set(team);
+}
+
 function getWinner(q){
   const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
   if(a===null||b===null||!state.config.numbersAssigned)return null;
@@ -567,7 +637,9 @@ function renderChatMessages(){
       const content=m.gif
         ?`<img class="chat-gif" src="${escapeAttr(m.gif)}" alt="GIF" loading="lazy">`
         :escapeHTML(m.text||'');
-      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name">${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}</div>`;
+      const chatTeam=state.teamPicks[m.name]||'';
+      const chatNameStyle=chatTeam?` style="color:${getTeamColor(chatTeam)||'var(--accent)'}"`:''  ;
+      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}</div>`;
     }).join('');
   requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
 }
@@ -749,8 +821,10 @@ function renderGame(){
       ${participants.length===0?'<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">No players yet</div>'
       :`<div class="participants-list">${participants.map(p=>{
         const pPaid=state.payments[p.name]?'✅':'';
+        const pTeam=state.teamPicks[p.name]||'';
+        const pTeamBadge=pTeam?`<span class="team-badge" style="background:${(getTeamColor(pTeam)||'var(--accent)')}22;color:${getTeamColor(pTeam)||'var(--accent)'}">${pTeam===team1?team1:team2}</span>`:'';
         return`<div class="participant-chip ${p.name===player?'is-you':''}">
-          <span class="p-name">${pPaid} ${escapeHTML(p.name)}</span>
+          <span class="p-name">${pPaid} ${escapeHTML(p.name)}${pTeamBadge}</span>
           <span class="p-count">${p.count?p.count+' sq':'joined'}</span>
         </div>`;}).join('')}</div>`}
     </div></div>
@@ -792,12 +866,28 @@ function renderGame(){
   const checks=getSettingsChecklist();
   const checklistHTML=checks.map(c=>`<div class="check-row ${c.done?'done':'missing'}"><span class="check-icon">${c.done?'✅':'⬜'}</span>${c.label}</div>`).join('');
 
+  const myPick=state.teamPicks[player]||'';
+  const t1Color=getTeamColor(team1)||'var(--accent)';
+  const t2Color=getTeamColor(team2)||'var(--red)';
+  const t1Count=Object.values(state.teamPicks).filter(t=>t===team1).length;
+  const t2Count=Object.values(state.teamPicks).filter(t=>t===team2).length;
+
   return`
     <div class="header">
       <h1>🏈 SUPER BOWL SQUARES</h1>
       <div class="user-bar">Playing as <span class="name">${player}</span></div>
+      <div class="team-picker">
+        <span class="tp-label">Rooting for:</span>
+        <button class="tp-btn ${myPick===team1?'selected':''}" style="${myPick===team1?'color:'+t1Color+';border-color:'+t1Color:''}" onclick="pickTeam('${escapeAttr(team1)}')">
+          ${getLogoHTML(team1)} ${team1} <span style="font-weight:400;opacity:.6">(${t1Count})</span>
+        </button>
+        <button class="tp-btn ${myPick===team2?'selected':''}" style="${myPick===team2?'color:'+t2Color+';border-color:'+t2Color:''}" onclick="pickTeam('${escapeAttr(team2)}')">
+          ${getLogoHTML(team2)} ${team2} <span style="font-weight:400;opacity:.6">(${t2Count})</span>
+        </button>
+      </div>
     </div>
     <div class="scoreboard">${sb}</div>
+    ${getCountdownHTML()}
     ${lockBanner}
     ${rules}
     ${venmoHTML}
