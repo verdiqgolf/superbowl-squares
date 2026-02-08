@@ -33,6 +33,9 @@ input{font-family:inherit;outline:none}
 .header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,52px);letter-spacing:3px;line-height:1}
 .header .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted)}
 .header .user-bar .name{color:var(--green);font-weight:600}
+.online-indicator{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:var(--muted);margin-top:4px}
+.online-indicator .online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(16,185,129,.5);animation:pulse 2s infinite}
+.online-indicator .online-count{font-weight:600;color:var(--green)}
 .team-picker{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
 .team-picker .tp-label{font-size:12px;color:var(--dim)}
 .team-picker .tp-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--border);background:var(--bg2);color:var(--muted);transition:all .15s;cursor:pointer}
@@ -61,6 +64,8 @@ input{font-family:inherit;outline:none}
 .scoreboard{max-width:600px;margin:12px auto;padding:0 12px}
 .score-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 0;font-size:clamp(11px,2.5vw,15px);border-bottom:1px solid var(--border)}
 .score-row:last-child{border:none}
+.score-row.score-flash{animation:scoreFlash 1.5s ease}
+@keyframes scoreFlash{0%{background:rgba(59,130,246,.3);transform:scale(1.02)}30%{background:rgba(59,130,246,.15)}100%{background:transparent;transform:scale(1)}}
 .score-row .qlabel{width:34px;text-align:center;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
 .score-row .team{width:clamp(60px,18vw,100px);font-weight:600;text-align:right;font-size:clamp(11px,2.2vw,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .score-row .team.t2{text-align:left}
@@ -96,7 +101,7 @@ input{font-family:inherit;outline:none}
 .venmo-btn:hover{background:#006FCC}
 .venmo-btn:active{transform:scale(.98)}
 .venmo-btn .venmo-logo{font-size:18px}
-.rules-section,.participants-section,.chat-section{max-width:600px;margin:8px auto;padding:0 12px}
+.rules-section,.participants-section,.chat-section,.odds-section{max-width:600px;margin:8px auto;padding:0 12px}
 .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:13px}
 .rules-grid .rl{color:var(--muted)}
 .rules-grid .rv{font-weight:600;text-align:right}
@@ -152,6 +157,16 @@ input{font-family:inherit;outline:none}
 .swatch-winner{background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4)}
 .swatch-open{background:var(--bg3);border:1px dashed var(--dim)}
 
+.odds-section{max-width:600px;margin:8px auto;padding:0 12px}
+.odds-list{display:flex;flex-direction:column;gap:4px}
+.odds-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:13px}
+.odds-row .odds-name{font-weight:600;min-width:60px;flex-shrink:0}
+.odds-row .odds-bar-wrap{flex:1;height:16px;background:var(--bg2);border-radius:8px;overflow:hidden;position:relative}
+.odds-row .odds-bar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .3s}
+.odds-row .odds-pct{font-size:11px;font-weight:700;color:var(--muted);min-width:36px;text-align:right}
+.odds-row.is-you .odds-name{color:var(--green)}
+.odds-row.is-you .odds-bar{background:linear-gradient(90deg,var(--green),#34D399)}
+
 .chat-messages{height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .chat-msg{font-size:13px;padding:6px 10px;border-radius:8px;background:var(--bg3);word-wrap:break-word;line-height:1.35}
 .chat-msg .chat-name{font-weight:700;color:var(--accent);margin-right:6px;font-size:12px}
@@ -159,7 +174,16 @@ input{font-family:inherit;outline:none}
 .chat-msg.yours{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.12)}
 .chat-msg.yours .chat-name{color:var(--green)}
 .chat-msg.system{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);text-align:center;font-style:italic;font-size:12px;color:var(--gold)}
-.chat-msg img.chat-gif{max-width:200px;max-height:160px;border-radius:6px;margin-top:4px;display:block}
+.chat-msg img.chat-gif{max-width:200px;max-height:160px;border-radius:6px;margin-top:4px;display:block;background:var(--bg3);min-height:80px;object-fit:cover}
+.chat-reactions{display:flex;gap:2px;margin-top:4px;flex-wrap:wrap}
+.chat-react-btn{padding:2px 6px;border-radius:10px;font-size:12px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;transition:all .1s;line-height:1.3}
+.chat-react-btn:hover{border-color:var(--accent);background:var(--bg4)}
+.chat-react-btn.mine{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.chat-react-btn .react-count{font-size:10px;margin-left:2px;color:var(--muted)}
+.chat-react-bar{display:flex;gap:3px;margin-top:3px;opacity:0;transition:opacity .15s}
+.chat-msg:hover .chat-react-bar{opacity:1}
+.chat-react-add{font-size:11px;padding:1px 5px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--dim);line-height:1.4}
+.chat-react-add:hover{border-color:var(--accent);color:var(--text)}
 .chat-input-row{display:flex;gap:6px}
 .chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;min-width:0}
 .chat-input-row input:focus{border-color:var(--accent)}
@@ -240,7 +264,7 @@ input{font-family:inherit;outline:none}
   .header{padding:12px 8px 0}
   .header h1{font-size:26px;letter-spacing:2px}
   .scoreboard{padding:0 8px;margin:10px auto}
-  .rules-section,.participants-section,.chat-section,.admin-section,.lock-banner,.venmo-section,.payment-section{padding:0 8px}
+  .rules-section,.participants-section,.chat-section,.admin-section,.lock-banner,.venmo-section,.payment-section,.odds-section{padding:0 8px}
   .collapsible-header{padding:10px 12px}
   .collapsible-inner{padding:10px 12px}
   .admin-panel{padding:14px}
@@ -257,6 +281,17 @@ input{font-family:inherit;outline:none}
 /* Confetti */
 .confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:150}
 
+/* Winner Spotlight */
+.spotlight-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:160;display:flex;align-items:center;justify-content:center;animation:spotFadeIn .3s ease}
+.spotlight-card{text-align:center;animation:spotZoom .4s cubic-bezier(.34,1.56,.64,1)}
+.spotlight-card .spot-emoji{font-size:72px;margin-bottom:8px;animation:spotBounce 1s ease infinite}
+.spotlight-card .spot-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,8vw,48px);color:var(--gold);letter-spacing:3px;text-shadow:0 0 30px rgba(251,191,36,.4)}
+.spotlight-card .spot-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,10vw,64px);color:#fff;letter-spacing:2px;margin-top:4px}
+.spotlight-card .spot-sub{font-size:14px;color:var(--muted);margin-top:8px}
+@keyframes spotFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spotZoom{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
 </style>
 </head>
 <body>
@@ -265,6 +300,7 @@ input{font-family:inherit;outline:none}
 <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
 <div id="gifOverlay"></div>
 <div id="toast" class="toast"></div>
+<div id="spotlightOverlay"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -328,10 +364,15 @@ let rulesOpen = true;
 let chatOpen = true;
 let participantsOpen = true;
 let paymentsOpen = true;
+let oddsOpen = false;
+let predictionsOpen = false;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
 let gifSearchTimeout = null;
+let onlineUsers = {};
+let prevScores = {};
+let flashQuarters = new Set();
 
 let state = {
   config:{team1:DEFAULT_TEAM1,team2:DEFAULT_TEAM2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:0,numParticipants:0,costPerPerson:0,gameLocked:true,giphyKey:''},
@@ -353,6 +394,14 @@ function initGame(){
 function registerPlayer(){
   if(!player)return;
   db.ref(`game/players/${player}`).set({joinedAt:Date.now()});
+  // Setup presence
+  const presRef=db.ref(`game/presence/${player}`);
+  db.ref('.info/connected').on('value',s=>{
+    if(s.val()===true){
+      presRef.onDisconnect().remove();
+      presRef.set(true);
+    }
+  });
 }
 
 function setupListeners(){
@@ -367,14 +416,28 @@ function setupListeners(){
     render();
   });
   db.ref('game/scores').on('value',s=>{
-    if(s.exists())state.scores={...state.scores,...s.val()};
-    else state.scores={q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
+    const newScores=s.exists()?{...state.scores,...s.val()}:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null};
+    // Detect which quarters changed
+    flashQuarters=new Set();
+    ['q1','q2','q3','q4'].forEach(q=>{
+      const k1=`${q}_t1`,k2=`${q}_t2`;
+      if((newScores[k1]!==prevScores[k1]||newScores[k2]!==prevScores[k2])&&(newScores[k1]!==null||newScores[k2]!==null)){
+        if(Object.keys(prevScores).length>0)flashQuarters.add(q);
+      }
+    });
+    if(flashQuarters.size>0&&Object.keys(prevScores).length>0)playSound('scoreUpdate');
+    prevScores={...newScores};
+    state.scores=newScores;
     render();
+    setTimeout(checkNewWinners,300);
+    // Clear flash after animation
+    if(flashQuarters.size>0)setTimeout(()=>{flashQuarters=new Set()},1600);
   });
   db.ref('game/squares').on('value',s=>{state.squares=s.exists()?s.val():{};render()});
   db.ref('game/randomWinners').on('value',s=>{
     state.randomWinners=s.exists()?{q1:null,q2:null,q3:null,q4:null,...s.val()}:{q1:null,q2:null,q3:null,q4:null};
     render();
+    setTimeout(checkNewWinners,300);
   });
   db.ref('game/players').on('value',s=>{
     state.players=s.exists()?s.val():{};
@@ -386,6 +449,14 @@ function setupListeners(){
   });
   db.ref('game/teamPicks').on('value',s=>{
     state.teamPicks=s.exists()?s.val():{};
+    render();
+  });
+  db.ref('game/presence').on('value',s=>{
+    onlineUsers=s.exists()?s.val():{};
+    render();
+  });
+  db.ref('game/predictions').on('value',s=>{
+    predictions=s.exists()?s.val():{};
     render();
   });
   db.ref('game/chat').orderByChild('ts').limitToLast(150).on('value',s=>{
@@ -547,7 +618,7 @@ function resetGame(){
   db.ref('game').set({
     config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true,giphyKey:state.config.giphyKey},
     scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
-    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,payments:null,teamPicks:null,chat:null
+    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,payments:null,teamPicks:null,chat:null,predictions:null,presence:null
   });
   localStorage.removeItem('sbsq_celebrated');
   showToast('Game reset!','success');
@@ -618,6 +689,7 @@ function getWinner(q){
 }
 
 // ── Chat ──
+const REACT_EMOJIS=['🔥','😂','💀','🧊','👀','💯'];
 function sendChat(){
   const i=document.getElementById('chatInput');if(!i)return;
   const t=i.value.trim();if(!t)return;
@@ -627,6 +699,14 @@ function sendChat(){
 function sendGif(url){
   db.ref('game/chat').push({name:player,gif:url,ts:Date.now(),system:false});
   closeGifPicker();
+}
+function reactToChat(msgId,emoji){
+  if(!player||!msgId)return;
+  const ref=db.ref(`game/chat/${msgId}/reactions/${emoji}/${player}`);
+  ref.once('value',s=>{
+    if(s.exists())ref.remove();
+    else ref.set(true);
+  });
 }
 function renderChatMessages(){
   const el=document.getElementById('chatMessages');if(!el)return;
@@ -641,7 +721,24 @@ function renderChatMessages(){
         :escapeHTML(m.text||'');
       const chatTeam=state.teamPicks[m.name]||'';
       const chatNameStyle=chatTeam?` style="color:${getTeamColor(chatTeam)||'var(--accent)'}"`:''  ;
-      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}</div>`;
+      // Build reaction display
+      let reactionsHTML='';
+      if(m.reactions){
+        const reactCounts={};
+        Object.entries(m.reactions).forEach(([emoji,users])=>{
+          const names=Object.keys(users||{});
+          if(names.length>0)reactCounts[emoji]={count:names.length,mine:names.includes(player)};
+        });
+        if(Object.keys(reactCounts).length>0){
+          reactionsHTML='<div class="chat-reactions">'+Object.entries(reactCounts).map(([emoji,d])=>
+            `<button class="chat-react-btn ${d.mine?'mine':''}" onclick="reactToChat('${m.id}','${emoji}')">${emoji}<span class="react-count">${d.count}</span></button>`
+          ).join('')+'</div>';
+        }
+      }
+      const reactBar=`<div class="chat-react-bar">${REACT_EMOJIS.map(e=>
+        `<button class="chat-react-add" onclick="reactToChat('${m.id}','${e}')">${e}</button>`
+      ).join('')}</div>`;
+      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}${reactionsHTML}${reactBar}</div>`;
     }).join('');
   requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
 }
@@ -697,6 +794,129 @@ function renderGifGrid(gifs){
 function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function escapeAttr(s){return s.replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function fmt$(n){return'$'+n.toLocaleString()}
+
+// ── Live Odds ──
+function buildOddsHTML(participants, winners){
+  if(!state.config.numbersAssigned)return'';
+  // Count remaining (non-won) quarters
+  const wonQs=new Set();
+  ['q1','q2','q3','q4'].forEach(q=>{if(winners[q])wonQs.add(q)});
+  const remainQs=['q1','q2','q3','q4'].filter(q=>!wonQs.has(q));
+  if(remainQs.length===0)return'';
+
+  // For each player, count how many of the 100 squares they own
+  const playerSquares={};
+  Object.values(state.squares).forEach(name=>{
+    if(!name||name===HOUSE_NAME)return;
+    playerSquares[name]=(playerSquares[name]||0)+1;
+  });
+  const totalSquares=Object.values(playerSquares).reduce((a,b)=>a+b,0)||1;
+  // Each square has a 1/100 chance per quarter, probability of winning at least once
+  const sorted=Object.entries(playerSquares).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  if(sorted.length===0)return'';
+
+  const rows=sorted.map(([name,count])=>{
+    // Per remaining quarter: count/100 chance to win. Across N quarters: 1-(1-count/100)^N
+    const pWin=1-Math.pow(1-count/100,remainQs.length);
+    const pct=Math.round(pWin*100);
+    const isYou=name===player;
+    return`<div class="odds-row ${isYou?'is-you':''}">
+      <span class="odds-name">${escapeHTML(name)}</span>
+      <div class="odds-bar-wrap"><div class="odds-bar" style="width:${Math.max(pct,2)}%"></div></div>
+      <span class="odds-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  return`<div class="odds-section">
+    <div class="collapsible-header ${oddsOpen?'is-open':''}" onclick="toggleOdds()">
+      <h3>📊 Win Probability (${remainQs.length} Qs left)</h3>
+      <span class="chevron ${oddsOpen?'open':''}">▼</span>
+    </div>
+    <div class="collapsible-body ${oddsOpen?'open':''}"><div class="collapsible-inner">
+      <p style="font-size:11px;color:var(--dim);margin-bottom:8px">Chance of winning at least 1 remaining quarter</p>
+      <div class="odds-list">${rows}</div>
+    </div></div>
+  </div>`;
+}
+
+// ── Score Predictions ──
+let predictions={};
+function buildPredictionsHTML(team1,team2){
+  const myPred=predictions[player]||null;
+  const allPreds=Object.entries(predictions);
+  // Check if game has started (any score entered)
+  const gameStarted=['q1_t1','q1_t2','q2_t1','q2_t2','q3_t1','q3_t2','q4_t1','q4_t2'].some(k=>state.scores[k]!==null&&state.scores[k]!==undefined);
+  const finalScore=state.scores.q4_t1!==null&&state.scores.q4_t2!==null;
+
+  let predContent='';
+  if(!myPred&&!gameStarted){
+    // Show prediction form
+    predContent=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
+      <span style="font-size:13px;font-weight:600">${team1}</span>
+      <input type="number" id="pred_t1" placeholder="0" min="0" max="99" style="width:50px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;text-align:center">
+      <span style="font-size:13px;color:var(--dim)">—</span>
+      <input type="number" id="pred_t2" placeholder="0" min="0" max="99" style="width:50px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;text-align:center">
+      <span style="font-size:13px;font-weight:600">${team2}</span>
+      <button class="btn-admin btn-primary" onclick="submitPrediction()">Lock In 🔒</button>
+    </div>
+    <p style="font-size:11px;color:var(--dim);text-align:center;margin-top:6px">Predict the final score! Locks when game starts.</p>`;
+  } else if(myPred){
+    predContent=`<div style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px">Your pick: ${team1} ${myPred.t1} — ${myPred.t2} ${team2}</div>`;
+  } else {
+    predContent=`<div style="text-align:center;font-size:12px;color:var(--dim);margin-bottom:6px">Predictions are locked (game started)</div>`;
+  }
+
+  // Show all predictions
+  if(allPreds.length>0){
+    let predRows='';
+    // If final score exists, rank by closeness
+    if(finalScore){
+      const actual_t1=state.scores.q4_t1, actual_t2=state.scores.q4_t2;
+      const ranked=allPreds.map(([name,p])=>{
+        const diff=Math.abs(p.t1-actual_t1)+Math.abs(p.t2-actual_t2);
+        const exact=p.t1===actual_t1&&p.t2===actual_t2;
+        return{name,p,diff,exact};
+      }).sort((a,b)=>a.diff-b.diff);
+      predRows=ranked.map((r,i)=>{
+        const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+        return`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg3);border-radius:6px;font-size:12px${r.name===player?';border:1px solid rgba(16,185,129,.3)':''}">
+          <span style="min-width:20px">${medal}</span>
+          <span style="font-weight:600;flex:1;${r.name===player?'color:var(--green)':''}">${escapeHTML(r.name)}</span>
+          <span style="color:var(--muted)">${r.p.t1}–${r.p.t2}</span>
+          <span style="color:${r.diff===0?'var(--gold)':r.diff<=7?'var(--green)':'var(--muted)'};font-weight:600;min-width:42px;text-align:right">${r.exact?'🎯 EXACT':'off by '+r.diff}</span>
+        </div>`;
+      }).join('');
+    } else {
+      predRows=allPreds.map(([name,p])=>{
+        return`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg3);border-radius:6px;font-size:12px${name===player?';border:1px solid rgba(16,185,129,.3)':''}">
+          <span style="font-weight:600;flex:1;${name===player?'color:var(--green)':''}">${escapeHTML(name)}</span>
+          <span style="color:var(--muted)">${p.t1}–${p.t2}</span>
+        </div>`;
+      }).join('');
+    }
+    predContent+=`<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">${predRows}</div>`;
+  }
+
+  return`<div class="odds-section">
+    <div class="collapsible-header ${predictionsOpen?'is-open':''}" onclick="togglePredictions()">
+      <h3>🔮 Score Predictions (${allPreds.length})</h3>
+      <span class="chevron ${predictionsOpen?'open':''}">▼</span>
+    </div>
+    <div class="collapsible-body ${predictionsOpen?'open':''}"><div class="collapsible-inner">
+      ${predContent}
+    </div></div>
+  </div>`;
+}
+
+function submitPrediction(){
+  if(!player)return;
+  const t1=parseInt(document.getElementById('pred_t1')?.value);
+  const t2=parseInt(document.getElementById('pred_t2')?.value);
+  if(isNaN(t1)||isNaN(t2)||t1<0||t2<0){showToast('Enter scores for both teams','error');return}
+  db.ref('game/predictions/'+player).set({t1,t2,ts:Date.now()});
+  showToast('🔮 Prediction locked in!','success');
+}
+
 
 function render(){
   const app=document.getElementById('app');
@@ -759,7 +979,8 @@ function renderGame(){
   let sb='';
   ['q1','q2','q3','q4'].forEach(q=>{
     const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`],w=winners[q],isW=w&&w.player;
-    sb+=`<div class="score-row ${isW?'winner-row':''}">
+    const isFlash=flashQuarters.has(q);
+    sb+=`<div class="score-row ${isW?'winner-row':''} ${isFlash?'score-flash':''}">
       <span class="team">${team1}</span><span class="score-num">${a!==null?a:'–'}</span>
       <span class="qlabel">${ql[q]}</span>
       <span class="score-num">${b!==null?b:'–'}</span><span class="team t2">${team2}</span>
@@ -840,9 +1061,10 @@ function renderGame(){
       :`<div class="participants-list">${participants.map(p=>{
         const pPaid=state.payments[p.name]?'✅':'';
         const pTeam=state.teamPicks[p.name]||'';
+        const pOnline=onlineUsers[p.name]?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 4px rgba(16,185,129,.5);margin-right:2px;vertical-align:middle"></span>':'';
         const pTeamBadge=pTeam?`<span class="team-badge" style="background:${(getTeamColor(pTeam)||'var(--accent)')}22;color:${getTeamColor(pTeam)||'var(--accent)'}">${pTeam===team1?team1:team2}</span>`:'';
         return`<div class="participant-chip ${p.name===player?'is-you':''}">
-          <span class="p-name">${pPaid} ${escapeHTML(p.name)}${pTeamBadge}</span>
+          <span class="p-name">${pOnline}${pPaid} ${escapeHTML(p.name)}${pTeamBadge}</span>
           <span class="p-count">${p.count?p.count+' sq':'joined'}</span>
         </div>`;}).join('')}</div>`}
     </div></div>
@@ -891,10 +1113,17 @@ function renderGame(){
   const t1Count=Object.values(state.teamPicks).filter(t=>t===team1).length;
   const t2Count=Object.values(state.teamPicks).filter(t=>t===team2).length;
 
+  const onlineCount=Object.keys(onlineUsers).length;
+  const onlineNames=Object.keys(onlineUsers).filter(n=>n!==player).slice(0,5);
+
   return`
     <div class="header">
       <h1>🏈 SUPER BOWL SQUARES</h1>
       <div class="user-bar">Playing as <span class="name">${player}</span></div>
+      <div class="online-indicator">
+        <span class="online-dot"></span>
+        <span class="online-count">${onlineCount}</span> watching now${onlineNames.length>0?' — '+onlineNames.map(n=>escapeHTML(n)).join(', ')+(onlineCount>onlineNames.length+1?' +more':''):''}
+      </div>
       <div class="team-picker">
         <span class="tp-label">Rooting for:</span>
         <button class="tp-btn ${myPick===team1?'selected':''}" style="${myPick===team1?'color:'+t1Color+';border-color:'+t1Color:''}" onclick="pickTeam('${escapeAttr(team1)}')">
@@ -933,6 +1162,9 @@ function renderGame(){
       <div class="legend-item"><div class="legend-swatch swatch-live" style="box-shadow:0 0 6px 2px rgba(16,185,129,.5);border:1px solid rgba(16,185,129,.5)"></div>Currently Winning</div>
       <div class="legend-item"><div class="legend-swatch swatch-house"></div>House</div>
     </div>
+
+    ${buildOddsHTML(participants,winners)}
+    ${buildPredictionsHTML(team1,team2)}
 
     <div class="chat-section">
       <div class="collapsible-header ${chatOpen?'is-open':''}" onclick="toggleChat()">
@@ -1056,9 +1288,63 @@ function toggleAdmin(){adminOpen=!adminOpen;render()}
 function toggleRules(){rulesOpen=!rulesOpen;render()}
 function toggleParticipants(){participantsOpen=!participantsOpen;render()}
 function togglePayments(){paymentsOpen=!paymentsOpen;render()}
+function toggleOdds(){oddsOpen=!oddsOpen;render()}
+function togglePredictions(){predictionsOpen=!predictionsOpen;render()}
 function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function showToast(m,t,dur){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t||''} show`;setTimeout(()=>e.className='toast',dur||2500)}
+
+function showSpotlight(name,quarter){
+  const el=document.getElementById('spotlightOverlay');
+  el.innerHTML=`<div class="spotlight-overlay" onclick="closeSpotlight()">
+    <div class="spotlight-card">
+      <div class="spot-emoji">🏆</div>
+      <div class="spot-title">${quarter} WINNER</div>
+      <div class="spot-name">${escapeHTML(name)}</div>
+      <div class="spot-sub">Tap anywhere to close</div>
+    </div>
+  </div>`;
+  setTimeout(closeSpotlight,5000);
+}
+function closeSpotlight(){document.getElementById('spotlightOverlay').innerHTML=''}
+
+// ── Sound Effects (Web Audio API — no files needed) ──
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new AudioCtx();return audioCtx}
+function playSound(type){
+  try{
+    const ctx=getAudio();
+    if(type==='winner'){
+      // Triumphant ascending chord
+      [523.25,659.25,783.99].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='triangle';o.frequency.value=f;
+        g.gain.setValueAtTime(0.15,ctx.currentTime+i*0.12);
+        g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+i*0.12+0.6);
+        o.connect(g);g.connect(ctx.destination);
+        o.start(ctx.currentTime+i*0.12);o.stop(ctx.currentTime+i*0.12+0.6);
+      });
+    }else if(type==='cashRegister'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='square';o.frequency.value=1200;
+      o.frequency.setValueAtTime(1200,ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(2400,ctx.currentTime+0.05);
+      o.frequency.setValueAtTime(1800,ctx.currentTime+0.06);
+      g.gain.setValueAtTime(0.12,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.2);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+0.2);
+    }else if(type==='scoreUpdate'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.value=880;
+      g.gain.setValueAtTime(0.1,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.15);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+0.15);
+    }
+  }catch(e){}
+}
 
 // ── Confetti ──
 const confettiCanvas=document.getElementById('confettiCanvas');
@@ -1128,29 +1414,20 @@ function checkNewWinners(){
     var w=getWinner(q);
     if(w&&w.player&&w.player!=='Unclaimed'&&w.player!==HOUSE_NAME&&!hasCelebrated('score_'+q)){
       setCelebrated('score_'+q);
+      playSound('winner');
       launchConfetti(q==='q4'?6000:4000);
+      showSpotlight(w.player,ql[q]);
       setTimeout(function(){showToast('🎉 Congrats to '+w.player+' on winning '+ql[q]+'!','success',5000)},300);
     }
     var rw=state.randomWinners[q];
     if(rw&&!hasCelebrated('draw_'+q)){
       setCelebrated('draw_'+q);
+      playSound('cashRegister');
       launchConfetti(4000);
       setTimeout(function(){showToast('🎉 Congrats to '+rw+' on winning the '+ql[q]+' random draw!','success',5000)},600);
     }
   });
 }
-
-// Hook score updates to trigger confetti
-db.ref('game/scores').on('value',function(s){
-  if(s.exists())state.scores=Object.assign({},state.scores,s.val());
-  render();
-  setTimeout(checkNewWinners,300);
-});
-db.ref('game/randomWinners').on('value',function(s){
-  state.randomWinners=s.exists()?Object.assign({q1:null,q2:null,q3:null,q4:null},s.val()):{q1:null,q2:null,q3:null,q4:null};
-  render();
-  setTimeout(checkNewWinners,300);
-});
 
 // Init
 initGame();setupListeners();
