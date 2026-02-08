@@ -180,10 +180,14 @@ input{font-family:inherit;outline:none}
 .chat-react-btn:hover{border-color:var(--accent);background:var(--bg4)}
 .chat-react-btn.mine{border-color:var(--accent);background:rgba(59,130,246,.12)}
 .chat-react-btn .react-count{font-size:10px;margin-left:2px;color:var(--muted)}
-.chat-react-bar{display:flex;gap:3px;margin-top:3px}
-.chat-react-add{font-size:13px;padding:2px 6px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--dim);line-height:1.4;transition:all .1s}
+.chat-react-wrap{position:relative;display:inline-block}
+.chat-react-add{font-size:13px;padding:2px 6px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--dim);line-height:1.4;transition:all .1s;margin-top:4px}
 .chat-react-add:hover{border-color:var(--accent);color:var(--text)}
 .chat-react-add:active{transform:scale(.9)}
+.react-popup{display:none;position:absolute;bottom:100%;left:0;background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:4px;gap:2px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.4);white-space:nowrap;margin-bottom:4px}
+.react-popup.show{display:flex}
+.react-popup button{font-size:16px;padding:4px 6px;background:none;border:none;cursor:pointer;border-radius:6px;transition:background .1s;line-height:1}
+.react-popup button:hover{background:var(--bg2)}
 .chat-input-row{display:flex;gap:6px}
 .chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;min-width:0}
 .chat-input-row input:focus{border-color:var(--accent)}
@@ -297,6 +301,22 @@ input{font-family:inherit;outline:none}
 <body>
 
 <div id="app"></div>
+<div id="chatPersist" style="display:none">
+  <div class="chat-section">
+    <div class="collapsible-header is-open" id="chatHeader" onclick="toggleChat()">
+      <h3>💬 Chat <span id="chatBadge"></span></h3>
+      <span class="chevron open" id="chatChevron">▼</span>
+    </div>
+    <div class="collapsible-body open" id="chatBody"><div class="collapsible-inner">
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-gif" id="chatGifBtn" onclick="openGifPicker()" title="Send a GIF">GIF</button>
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div></div>
+  </div>
+</div>
 <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
 <div id="gifOverlay"></div>
 <div id="toast" class="toast"></div>
@@ -473,14 +493,9 @@ function setupListeners(){
     else unreadCount=0;
     lastChatCount=chatMessages.length;
     renderChatMessages();
-    // Update unread badge without full re-render
-    const badge=document.querySelector('.chat-unread');
-    const chatHeader=document.querySelector('.chat-section .collapsible-header h3');
-    if(chatHeader){
-      const existing=chatHeader.querySelector('.chat-unread');
-      if(existing)existing.remove();
-      if(unreadCount>0)chatHeader.insertAdjacentHTML('beforeend',`<span class="chat-unread">${unreadCount}</span>`);
-    }
+    // Update unread badge on persistent chat header
+    const badge=document.getElementById('chatBadge');
+    if(badge)badge.innerHTML=unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
   });
 
   // Countdown ticker — update every second
@@ -811,14 +826,23 @@ function renderChatMessages(){
           ).join('')+'</div>';
         }
       }
-      const reactBar=`<div class="chat-react-bar">${REACT_EMOJIS.map(e=>
-        `<button class="chat-react-add" onclick="reactToChat('${m.id}','${e}')">${e}</button>`
-      ).join('')}</div>`;
-      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}${reactionsHTML}${reactBar}</div>`;
+      const reactBtn=`<span class="chat-react-wrap"><button class="chat-react-add" onclick="toggleReactPopup(this)">+</button><div class="react-popup" id="rp_${m.id}">${REACT_EMOJIS.map(e=>
+        `<button onclick="reactToChat('${m.id}','${e}');closeReactPopups()">${e}</button>`
+      ).join('')}</div></span>`;
+      return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}${reactionsHTML} ${reactBtn}</div>`;
     }).join('');
   // Only auto-scroll if user was near bottom (not scrolled up reading history)
   const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
   if(atBottom)requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
+}
+function toggleReactPopup(btn){
+  const popup=btn.nextElementSibling;
+  const wasOpen=popup.classList.contains('show');
+  closeReactPopups();
+  if(!wasOpen)popup.classList.add('show');
+}
+function closeReactPopups(){
+  document.querySelectorAll('.react-popup.show').forEach(p=>p.classList.remove('show'));
 }
 
 // ── GIPHY ──
@@ -1022,24 +1046,26 @@ function render(){
 function renderNow(){
   renderTimer=null;
   const app=document.getElementById('app');
-  if(!player){app.innerHTML=renderSignIn();return}
-  // Preserve chat state
-  const chatVal=document.getElementById('chatInput')?.value||'';
-  const chatEl=document.getElementById('chatMessages');
-  const chatScroll=chatEl?chatEl.scrollTop:0;
-  const chatAtBottom=chatEl?(chatEl.scrollHeight-chatEl.scrollTop-chatEl.clientHeight<40):true;
-  // Rebuild
+  if(!player){app.innerHTML=renderSignIn();document.getElementById('chatPersist').style.display='none';return}
+  // Detach persistent chat before wiping app (so it survives innerHTML replace)
+  const chatP=document.getElementById('chatPersist');
+  if(chatP&&chatP.parentElement!==document.body)document.body.appendChild(chatP);
+  // Rebuild non-chat content
   app.innerHTML=renderGame();
-  // Restore chat
-  const ci=document.getElementById('chatInput');
-  if(ci&&chatVal)ci.value=chatVal;
-  renderChatMessages();
-  // Restore scroll — if user was at bottom, stay at bottom; otherwise keep position
-  const newChatEl=document.getElementById('chatMessages');
-  if(newChatEl){
-    if(chatAtBottom)newChatEl.scrollTop=newChatEl.scrollHeight;
-    else newChatEl.scrollTop=chatScroll;
+  // Mount persistent chat into placeholder
+  const mount=document.getElementById('chatMount');
+  if(mount&&chatP){
+    chatP.style.display='';
+    mount.appendChild(chatP);
+    // Update GIF button state
+    const gifBtn=document.getElementById('chatGifBtn');
+    if(gifBtn){
+      const gifReady=hasGiphyKey();
+      gifBtn.className='btn-gif'+(gifReady?'':' disabled');
+      gifBtn.onclick=gifReady?openGifPicker:()=>showToast('GIFs not set up yet','error');
+    }
   }
+  renderChatMessages();
 }
 
 function renderSignIn(){
@@ -1067,25 +1093,38 @@ function renderGame(){
   const participants=getParticipants();
   const gifReady=hasGiphyKey();
 
+  // Determine which quarter is "live" (latest with scores) vs "decided" (earlier quarters)
+  // Latest quarter with scores = live (green glow), earlier quarters = decided winners
+  const orderedQs=['q1','q2','q3','q4'];
+  let latestScoredQ=null;
+  for(let i=orderedQs.length-1;i>=0;i--){
+    const q=orderedQs[i];
+    const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
+    if(a!==null&&a!==undefined&&b!==null&&b!==undefined){latestScoredQ=q;break}
+  }
+
   const winners={};
-  ['q1','q2','q3','q4'].forEach(q=>{winners[q]=getWinner(q)});
+  orderedQs.forEach(q=>{
+    // A quarter is a confirmed winner only if it has scores AND a later quarter also has scores
+    // (meaning this quarter is done). Exception: Q4 is always final when scored (no Q5).
+    if(q===latestScoredQ&&q!=='q4'){
+      winners[q]=null; // This is the live quarter, not decided yet
+    } else {
+      winners[q]=getWinner(q);
+    }
+  });
   const winCells=new Set();
   Object.values(winners).forEach(w=>{if(w)winCells.add(`r${w.row}c${w.col}`)});
 
-  // Find the "live" winning cell — latest quarter with scores entered
+  // Find the "live" winning cell — the current quarter being played (green glow)
   let liveCell=null;
-  if(state.config.numbersAssigned){
-    const qs=['q4','q3','q2','q1'];
-    for(const q of qs){
-      const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
-      if(a!==null&&a!==undefined&&b!==null&&b!==undefined){
-        const d1=a%10,d2=b%10;
-        const col=state.config.colNumbers.indexOf(d1);
-        const row=state.config.rowNumbers.indexOf(d2);
-        if(col>=0&&row>=0)liveCell=`r${row}c${col}`;
-        break;
-      }
-    }
+  if(state.config.numbersAssigned&&latestScoredQ&&(latestScoredQ!=='q4'||!winners.q4)){
+    const q=latestScoredQ;
+    const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`];
+    const d1=a%10,d2=b%10;
+    const col=state.config.colNumbers.indexOf(d1);
+    const row=state.config.rowNumbers.indexOf(d2);
+    if(col>=0&&row>=0)liveCell=`r${row}c${col}`;
   }
   const ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'Q4/F'};
 
@@ -1093,12 +1132,15 @@ function renderGame(){
   let sb='';
   ['q1','q2','q3','q4'].forEach(q=>{
     const a=state.scores[`${q}_t1`],b=state.scores[`${q}_t2`],w=winners[q],isW=w&&w.player;
+    const isLiveQ=q===latestScoredQ&&!isW;
     const isFlash=flashQuarters.has(q);
     sb+=`<div class="score-row ${isW?'winner-row':''} ${isFlash?'score-flash':''}">
       <span class="team">${team1}</span><span class="score-num">${a!==null?a:'–'}</span>
       <span class="qlabel">${ql[q]}</span>
       <span class="score-num">${b!==null?b:'–'}</span><span class="team t2">${team2}</span>
-      ${isW?`<span class="winner-badge">${w.player===HOUSE_NAME?'🏠 House (rolls over)':'🏆 '+w.player}</span>`:''}
+      ${isW?`<span class="winner-badge">${w.player===HOUSE_NAME?'🏠 House (rolls over)':'🏆 '+w.player}</span>`
+        :isLiveQ?'<span class="winner-badge" style="background:rgba(16,185,129,.15);color:var(--green)">🟢 LIVE</span>'
+        :''}
     </div>`;
   });
 
@@ -1217,7 +1259,6 @@ function renderGame(){
   });
 
   const yourLbl=max>0?`You: <span class="count ${atLimit?'at-limit':''}">${yourCount}/${max}</span>`:`You: <span class="count">${yourCount}</span>`;
-  const unreadBadge=unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
   const checks=getSettingsChecklist();
   const checklistHTML=checks.map(c=>`<div class="check-row ${c.done?'done':'missing'}"><span class="check-icon">${c.done?'✅':'⬜'}</span>${c.label}</div>`).join('');
 
@@ -1282,20 +1323,7 @@ function renderGame(){
     ${buildOddsHTML(participants,winners)}
     ${buildPredictionsHTML(team1,team2)}
 
-    <div class="chat-section">
-      <div class="collapsible-header ${chatOpen?'is-open':''}" onclick="toggleChat()">
-        <h3>💬 Chat ${unreadBadge}</h3>
-        <span class="chevron ${chatOpen?'open':''}">▼</span>
-      </div>
-      <div class="collapsible-body ${chatOpen?'open':''}"><div class="collapsible-inner">
-        <div id="chatMessages" class="chat-messages"></div>
-        <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="btn-gif ${gifReady?'':'disabled'}" onclick="${gifReady?'openGifPicker()':'showToast(\'GIFs not set up yet\',\'error\')'}" title="${gifReady?'Send a GIF':'Admin needs to add GIPHY API key'}">GIF</button>
-          <button onclick="sendChat()">Send</button>
-        </div>
-      </div></div>
-    </div>
+    <div id="chatMount"></div>
 
     ${isAdmin?`
     <div class="admin-section" style="margin-top:16px">
@@ -1409,7 +1437,22 @@ function toggleParticipants(){participantsOpen=!participantsOpen;render()}
 function togglePayments(){paymentsOpen=!paymentsOpen;render()}
 function toggleOdds(){oddsOpen=!oddsOpen;render()}
 function togglePredictions(){predictionsOpen=!predictionsOpen;render()}
-function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
+function toggleChat(){
+  chatOpen=!chatOpen;
+  if(chatOpen)unreadCount=0;
+  const header=document.getElementById('chatHeader');
+  const body=document.getElementById('chatBody');
+  const chevron=document.getElementById('chatChevron');
+  const badge=document.getElementById('chatBadge');
+  if(header)header.className='collapsible-header'+(chatOpen?' is-open':'');
+  if(body)body.className='collapsible-body'+(chatOpen?' open':'');
+  if(chevron)chevron.className='chevron'+(chatOpen?' open':'');
+  if(badge)badge.innerHTML=chatOpen?'':unreadCount>0?`<span class="chat-unread">${unreadCount}</span>`:'';
+  if(chatOpen){
+    const el=document.getElementById('chatMessages');
+    if(el)requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
+  }
+}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function showToast(m,t,dur){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t||''} show`;setTimeout(()=>e.className='toast',dur||2500)}
 
@@ -1528,8 +1571,17 @@ function hasCelebrated(key){return!!getCelebrated()[key]}
 
 function checkNewWinners(){
   if(!player)return;
+  // Find latest scored quarter (the "live" one — not decided yet unless it's Q4)
+  var ordQ=['q1','q2','q3','q4'];
+  var latestQ=null;
+  for(var i=ordQ.length-1;i>=0;i--){
+    var a=state.scores[ordQ[i]+'_t1'],b=state.scores[ordQ[i]+'_t2'];
+    if(a!==null&&a!==undefined&&b!==null&&b!==undefined){latestQ=ordQ[i];break}
+  }
   var ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
-  ['q1','q2','q3','q4'].forEach(function(q){
+  ordQ.forEach(function(q){
+    // Skip the live quarter (except Q4 which is always final when scored)
+    if(q===latestQ&&q!=='q4')return;
     var w=getWinner(q);
     if(w&&w.player&&w.player!=='Unclaimed'&&w.player!==HOUSE_NAME&&!hasCelebrated('score_'+q)){
       setCelebrated('score_'+q);
@@ -1549,6 +1601,7 @@ function checkNewWinners(){
 }
 
 // Init
+document.addEventListener('click',e=>{if(!e.target.closest('.chat-react-wrap'))closeReactPopups()});
 initGame();setupListeners();
 if(player)registerPlayer();
 render();
