@@ -453,7 +453,14 @@ function setupListeners(){
   });
   db.ref('game/presence').on('value',s=>{
     onlineUsers=s.exists()?s.val():{};
-    render();
+    // Update online indicator in-place if it exists, otherwise queue render
+    const indicator=document.querySelector('.online-indicator');
+    if(indicator){
+      const count=Object.keys(onlineUsers).length;
+      const names=Object.keys(onlineUsers).filter(n=>n!==player).slice(0,5);
+      indicator.innerHTML=`<span class="online-dot"></span>
+        <span class="online-count">${count}</span> watching now${names.length>0?' — '+names.map(n=>escapeHTML(n)).join(', ')+(count>names.length+1?' +more':''):''}`;
+    } else render();
   });
   db.ref('game/predictions').on('value',s=>{
     predictions=s.exists()?s.val():{};
@@ -466,6 +473,14 @@ function setupListeners(){
     else unreadCount=0;
     lastChatCount=chatMessages.length;
     renderChatMessages();
+    // Update unread badge without full re-render
+    const badge=document.querySelector('.chat-unread');
+    const chatHeader=document.querySelector('.chat-section .collapsible-header h3');
+    if(chatHeader){
+      const existing=chatHeader.querySelector('.chat-unread');
+      if(existing)existing.remove();
+      if(unreadCount>0)chatHeader.insertAdjacentHTML('beforeend',`<span class="chat-unread">${unreadCount}</span>`);
+    }
   });
 
   // Countdown ticker — update every second
@@ -801,7 +816,9 @@ function renderChatMessages(){
       ).join('')}</div>`;
       return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name"${chatNameStyle}>${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}${reactionsHTML}${reactBar}</div>`;
     }).join('');
-  requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
+  // Only auto-scroll if user was near bottom (not scrolled up reading history)
+  const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
+  if(atBottom)requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
 }
 
 // ── GIPHY ──
@@ -996,14 +1013,33 @@ function submitPrediction(){
 }
 
 
+let renderTimer=null;
 function render(){
+  // Debounce: batch rapid Firebase updates into a single DOM rebuild
+  if(renderTimer)cancelAnimationFrame(renderTimer);
+  renderTimer=requestAnimationFrame(renderNow);
+}
+function renderNow(){
+  renderTimer=null;
   const app=document.getElementById('app');
   if(!player){app.innerHTML=renderSignIn();return}
+  // Preserve chat state
   const chatVal=document.getElementById('chatInput')?.value||'';
+  const chatEl=document.getElementById('chatMessages');
+  const chatScroll=chatEl?chatEl.scrollTop:0;
+  const chatAtBottom=chatEl?(chatEl.scrollHeight-chatEl.scrollTop-chatEl.clientHeight<40):true;
+  // Rebuild
   app.innerHTML=renderGame();
+  // Restore chat
   const ci=document.getElementById('chatInput');
   if(ci&&chatVal)ci.value=chatVal;
   renderChatMessages();
+  // Restore scroll — if user was at bottom, stay at bottom; otherwise keep position
+  const newChatEl=document.getElementById('chatMessages');
+  if(newChatEl){
+    if(chatAtBottom)newChatEl.scrollTop=newChatEl.scrollHeight;
+    else newChatEl.scrollTop=chatScroll;
+  }
 }
 
 function renderSignIn(){
