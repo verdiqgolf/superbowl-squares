@@ -167,8 +167,8 @@ input{font-family:inherit;outline:none}
 .odds-row.is-you .odds-name{color:var(--green)}
 .odds-row.is-you .odds-bar{background:linear-gradient(90deg,var(--green),#34D399)}
 
-.chat-messages{height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-.chat-msg{font-size:13px;padding:6px 10px;border-radius:8px;background:var(--bg3);word-wrap:break-word;line-height:1.35}
+.chat-messages{height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.chat-msg{font-size:13px;padding:6px 10px;border-radius:8px;background:var(--bg3);word-wrap:break-word;line-height:1.35;position:relative}
 .chat-msg .chat-name{font-weight:700;color:var(--accent);margin-right:6px;font-size:12px}
 .chat-msg .chat-time{color:var(--dim);font-size:10px;float:right;margin-top:2px}
 .chat-msg.yours{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.12)}
@@ -180,10 +180,10 @@ input{font-family:inherit;outline:none}
 .chat-react-btn:hover{border-color:var(--accent);background:var(--bg4)}
 .chat-react-btn.mine{border-color:var(--accent);background:rgba(59,130,246,.12)}
 .chat-react-btn .react-count{font-size:10px;margin-left:2px;color:var(--muted)}
-.chat-react-bar{display:flex;gap:3px;margin-top:3px;opacity:0;transition:opacity .15s}
-.chat-msg:hover .chat-react-bar{opacity:1}
-.chat-react-add{font-size:11px;padding:1px 5px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--dim);line-height:1.4}
+.chat-react-bar{display:flex;gap:3px;margin-top:3px}
+.chat-react-add{font-size:13px;padding:2px 6px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;color:var(--dim);line-height:1.4;transition:all .1s}
 .chat-react-add:hover{border-color:var(--accent);color:var(--text)}
+.chat-react-add:active{transform:scale(.9)}
 .chat-input-row{display:flex;gap:6px}
 .chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;min-width:0}
 .chat-input-row input:focus{border-color:var(--accent)}
@@ -268,7 +268,7 @@ input{font-family:inherit;outline:none}
   .collapsible-header{padding:10px 12px}
   .collapsible-inner{padding:10px 12px}
   .admin-panel{padding:14px}
-  .chat-messages{height:220px}
+  .chat-messages{height:320px}
   .chat-msg img.chat-gif{max-width:160px;max-height:120px}
   .gif-picker{max-height:60vh}
   .grid-section{padding:8px 2px 12px}
@@ -365,7 +365,7 @@ let chatOpen = true;
 let participantsOpen = true;
 let paymentsOpen = true;
 let oddsOpen = false;
-let predictionsOpen = false;
+let predictionsOpen = true;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
@@ -541,28 +541,31 @@ function claimSquare(r,c){
 
 function getSettingsChecklist(){
   const c=state.config;
+  const p=getParticipants().length;
   return [
-    {label:'Teams configured',done:c.team1&&c.team1!==DEFAULT_TEAM1&&c.team2&&c.team2!==DEFAULT_TEAM2},
-    {label:'# Participants set',done:(c.numParticipants||0)>0},
+    {label:'Teams configured',done:c.team1&&c.team2},
     {label:'$ Per Person set',done:(c.costPerPerson||0)>0},
-    {label:'Max squares/player set',done:(c.maxPerPlayer||0)>0},
+    {label:`${p} player${p!==1?'s':''} signed up`,done:p>0},
+    {label:'GIPHY key set',done:!!c.giphyKey},
   ];
 }
 
 function toggleGameLock(){
   const opening=isGameLocked();
   if(opening){
-    const checks=getSettingsChecklist();
-    const missing=checks.filter(c=>!c.done);
-    if(missing.length){
-      if(!confirm(`These settings aren't configured yet:\n\n${missing.map(m=>'• '+m.label).join('\n')}\n\nOpen the game anyway?`))return;
-    }
-  }
-  db.ref('game/config/gameLocked').set(!opening);
-  if(opening){
-    db.ref('game/chat').push({name:'🏈',text:'The game is now OPEN! Start claiming your squares!',ts:Date.now(),system:true});
+    // Auto-set participants from signed-up players
+    const participants=getParticipants();
+    const numP=participants.length;
+    if(numP===0){showToast('No players have signed up yet!','error');return}
+    const maxPer=Math.floor(100/numP);
+    const remainder=100-(maxPer*numP);
+    const msg=`Opening game for ${numP} players:\n\n• ${maxPer} squares each\n${remainder>0?`• ${remainder} House squares (remainder)\n`:''}• Buy-in: ${state.config.costPerPerson?fmt$(state.config.costPerPerson):'not set'}\n\nProceed?`;
+    if(!confirm(msg))return;
+    db.ref('game/config').update({gameLocked:false,numParticipants:numP,maxPerPlayer:maxPer});
+    db.ref('game/chat').push({name:'🏈',text:`The game is now OPEN! ${numP} players, ${maxPer} squares each. Pick your squares!`,ts:Date.now(),system:true});
     showToast('Game opened!','success');
   }else{
+    db.ref('game/config/gameLocked').set(true);
     db.ref('game/chat').push({name:'🔒',text:'The game has been locked by the admin.',ts:Date.now(),system:true});
     showToast('Game locked','success');
   }
@@ -655,6 +658,64 @@ function clearHouseSquares(){
   if(!confirm(`Remove ${count} House square${count>1?'s':''}?`))return;
   db.ref('game/squares').update(updates);
   showToast(`${count} House squares removed`,'success');
+}
+
+function autoAssignAllSquares(){
+  const participants=getParticipants();
+  const numP=participants.length;
+  if(numP===0){showToast('No players!','error');return}
+  const maxPer=state.config.maxPerPlayer||Math.floor(100/numP);
+
+  // Find all empty squares
+  const empty=[];
+  for(let r=0;r<10;r++){
+    for(let c=0;c<10;c++){
+      const k=`r${r}c${c}`;
+      if(!state.squares[k])empty.push(k);
+    }
+  }
+  if(empty.length===0){showToast('All squares claimed!','error');return}
+
+  // Shuffle empty squares
+  const shuffled=shuffle(empty);
+
+  // Count current squares per player
+  const counts={};
+  participants.forEach(p=>counts[p.name]=0);
+  Object.values(state.squares).forEach(n=>{if(n&&n!==HOUSE_NAME&&counts[n]!==undefined)counts[n]++});
+
+  // Fill players up to maxPer
+  const updates={};
+  let idx=0;
+  let playersFilled=0;
+  // Keep cycling through players who need squares
+  let changed=true;
+  while(changed&&idx<shuffled.length){
+    changed=false;
+    for(const p of participants){
+      if(idx>=shuffled.length)break;
+      if(counts[p.name]<maxPer){
+        updates[shuffled[idx]]=p.name;
+        counts[p.name]++;
+        idx++;
+        changed=true;
+        playersFilled++;
+      }
+    }
+  }
+  // Remaining squares become house
+  let houseCount=0;
+  while(idx<shuffled.length){
+    updates[shuffled[idx]]=HOUSE_NAME;
+    idx++;
+    houseCount++;
+  }
+  if(Object.keys(updates).length===0){showToast('Nothing to assign!','error');return}
+  const summary=`Auto-assign ${playersFilled} squares to players${houseCount>0?` + ${houseCount} House squares`:''}?`;
+  if(!confirm(summary))return;
+  db.ref('game/squares').update(updates);
+  db.ref('game/chat').push({name:'🤖',text:`Auto-assigned ${playersFilled} squares to players${houseCount>0?' + '+houseCount+' to House':''}!`,ts:Date.now(),system:true});
+  showToast('Squares auto-assigned!','success');
 }
 
 function getHouseCount(){return Object.values(state.squares).filter(v=>v===HOUSE_NAME).length}
@@ -1134,6 +1195,7 @@ function renderGame(){
         </button>
       </div>
     </div>
+    ${BUYIN&&player!==ADMIN_NAME&&!state.payments[player]?`<div style="max-width:600px;margin:6px auto;padding:0 12px"><a href="${venmoURL}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:10px;background:rgba(0,140,255,.1);border:1px solid rgba(0,140,255,.25);color:#4DA6FF;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s"><span>Ⓥ</span> Pay ${fmt$(BUYIN)} via Venmo</a></div>`:''}
     <div class="scoreboard">${sb}</div>
     ${getCountdownHTML()}
     ${lockBanner}
@@ -1189,12 +1251,13 @@ function renderGame(){
 
         <h3>🎮 Game Status</h3>
         <button class="game-lock-btn ${locked?'is-locked':'is-open'}" onclick="toggleGameLock()">
-          ${locked?'🔓 OPEN GAME — Let Players Claim Squares':'🔒 LOCK GAME — Stop Square Claims'}
+          ${locked?`🔓 OPEN GAME (${participants.length} players → ${participants.length>0?Math.floor(100/participants.length):0} sq each)`:'🔒 LOCK GAME — Stop Square Claims'}
         </button>
         <div class="game-status">
           <span class="status-dot ${locked?'off':'live'}"></span>
           <span style="color:${locked?'var(--red)':'var(--green)'};font-weight:600">${locked?'Game is LOCKED':'Game is LIVE'}</span>
         </div>
+        ${!locked&&(100-claimed)>0?`<div style="margin-top:8px"><button class="btn-admin btn-primary" onclick="autoAssignAllSquares()" style="background:#2563EB;width:100%;padding:10px">🤖 Auto-Fill Remaining ${100-claimed} Squares</button><p class="admin-msg" style="margin-top:4px">Assigns empty squares to players under their max, fills rest as House</p></div>`:''}
         <div class="settings-checklist">${checklistHTML}</div>
 
         <hr class="admin-divider">
@@ -1229,9 +1292,11 @@ function renderGame(){
         <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
         ${splitInfo?`<p class="admin-msg" style="margin-top:6px">${splitInfo.total} players × ${splitInfo.perPlayer} squares = ${splitInfo.perPlayer*splitInfo.total}${splitInfo.remainder>0?` → <strong style="color:#A78BFA">${splitInfo.remainder} leftover → House squares</strong>`:' ✅ divides evenly'}</p>`:''}
         <div class="admin-row" style="margin-top:8px">
+          <button class="btn-admin btn-primary" onclick="autoAssignAllSquares()" style="background:#2563EB">🤖 Auto-Fill All Squares</button>
           <button class="btn-admin btn-primary" onclick="fillHouseSquares()" style="background:#7C3AED">🏠 Fill Empty as House</button>
           ${houseCount>0?`<button class="btn-admin btn-danger" onclick="clearHouseSquares()">Clear ${houseCount} House</button>`:''}
         </div>
+        <p class="admin-msg" style="margin-top:4px">🤖 Auto-Fill assigns empty squares to players under their max, then fills the rest as House.</p>
         ${houseCount>0?'<p class="admin-msg">🏠 If a House square wins, prize rolls back into the pot.</p>':''}
 
         <hr class="admin-divider">
