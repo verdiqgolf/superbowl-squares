@@ -480,7 +480,6 @@ function sendGif(url){
 }
 function renderChatMessages(){
   const el=document.getElementById('chatMessages');if(!el)return;
-  const atBot=el.scrollHeight-el.scrollTop-el.clientHeight<50;
   el.innerHTML=chatMessages.length===0
     ?'<div class="chat-empty">No messages yet. Say hi! 👋</div>'
     :chatMessages.map(m=>{
@@ -492,7 +491,7 @@ function renderChatMessages(){
         :escapeHTML(m.text||'');
       return`<div class="chat-msg ${isYou?'yours':''}"><span class="chat-name">${escapeHTML(m.name)}</span><span class="chat-time">${t}</span><br>${content}</div>`;
     }).join('');
-  if(atBot)el.scrollTop=el.scrollHeight;
+  requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight});
 }
 
 // ── GIPHY ──
