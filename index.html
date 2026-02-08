@@ -96,6 +96,8 @@ input{font-family:inherit;outline:none}
 .grid-cell:active:not(.claimed):not(.maxed){background:var(--accent);transform:scale(.93)}
 .grid-cell.claimed{background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--text)}
 .grid-cell.yours{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.grid-cell.house{background:rgba(139,92,246,.1);border:1px dashed rgba(139,92,246,.35);color:#A78BFA;font-size:clamp(8px,1.6vw,11px);cursor:default}
+.swatch-house{background:rgba(139,92,246,.15);border:1px dashed rgba(139,92,246,.4)}
 .grid-cell.winner{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);font-weight:700;box-shadow:0 0 10px rgba(251,191,36,.08)}
 .grid-cell.maxed{cursor:not-allowed;opacity:.5}
 
@@ -244,6 +246,7 @@ const DEFAULT_TEAM1 = "Patriots";
 const DEFAULT_TEAM2 = "Seahawks";
 const ADMIN_NAME = "Sean";
 const RANDOM_PRIZE = 10;
+const HOUSE_NAME = '🏠 House';
 
 const TEAM_LOGOS = {
   "Patriots":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png","Seahawks":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
@@ -359,6 +362,7 @@ function getParticipants(){
   const squareCounts={};
   Object.values(state.squares).forEach(n=>{squareCounts[n]=(squareCounts[n]||0)+1});
   const allNames=new Set([...Object.keys(state.players),...Object.keys(squareCounts)]);
+  allNames.delete(HOUSE_NAME);
   return[...allNames].map(name=>({name,count:squareCounts[name]||0})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name));
 }
 
@@ -405,7 +409,7 @@ function toggleGameLock(){
 }
 
 function drawRandomWinner(q){
-  const owners=[...new Set(Object.values(state.squares))];
+  const owners=[...new Set(Object.values(state.squares).filter(n=>n!==HOUSE_NAME))];
   if(!owners.length){showToast('No squares claimed!','error');return}
   if(state.randomWinners[q]&&!confirm(`Redraw ${q.toUpperCase()}?`))return;
   const w=owners[Math.floor(Math.random()*owners.length)];
@@ -457,6 +461,49 @@ function resetGame(){
     squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,chat:null
   });
   showToast('Game reset!','success');
+}
+
+function fillHouseSquares(){
+  let count=0;
+  for(let r=0;r<10;r++){
+    for(let c=0;c<10;c++){
+      const k=`r${r}c${c}`;
+      if(!state.squares[k])count++;
+    }
+  }
+  if(count===0){showToast('No empty squares!','error');return}
+  if(!confirm(`Fill ${count} unclaimed square${count>1?'s':''} as House squares?\n\nIf a House square wins, the prize rolls back into the pot.`))return;
+  const updates={};
+  for(let r=0;r<10;r++){
+    for(let c=0;c<10;c++){
+      const k=`r${r}c${c}`;
+      if(!state.squares[k])updates[k]=HOUSE_NAME;
+    }
+  }
+  db.ref('game/squares').update(updates);
+  showToast(`${count} House squares added!`,'success');
+}
+
+function clearHouseSquares(){
+  let count=0;
+  const updates={};
+  Object.entries(state.squares).forEach(([k,v])=>{
+    if(v===HOUSE_NAME){updates[k]=null;count++}
+  });
+  if(count===0){showToast('No House squares to clear','error');return}
+  if(!confirm(`Remove ${count} House square${count>1?'s':''}?`))return;
+  db.ref('game/squares').update(updates);
+  showToast(`${count} House squares removed`,'success');
+}
+
+function getHouseCount(){return Object.values(state.squares).filter(v=>v===HOUSE_NAME).length}
+
+function getEvenSplitInfo(){
+  const n=state.config.numParticipants||0;
+  if(n<=0)return null;
+  const perPlayer=Math.floor(100/n);
+  const remainder=100-(perPlayer*n);
+  return{perPlayer,remainder,total:n};
 }
 
 function getWinner(q){
@@ -572,6 +619,8 @@ function renderGame(){
   const yourCount=getPlayerCount(player);
   const max=state.config.maxPerPlayer;
   const atLimit=isAtLimit();
+  const houseCount=getHouseCount();
+  const splitInfo=getEvenSplitInfo();
   const locked=isGameLocked();
   const pay=getPayouts();
   const hasMoney=pay.totalPot>0;
@@ -593,7 +642,7 @@ function renderGame(){
       <span class="team">${team1}</span><span class="score-num">${a!==null?a:'–'}</span>
       <span class="qlabel">${ql[q]}</span>
       <span class="score-num">${b!==null?b:'–'}</span><span class="team t2">${team2}</span>
-      ${isW?`<span class="winner-badge">🏆 ${w.player}</span>`:''}
+      ${isW?`<span class="winner-badge">${w.player===HOUSE_NAME?'🏠 House (rolls over)':'🏆 '+w.player}</span>`:''}
     </div>`;
   });
 
@@ -627,7 +676,7 @@ function renderGame(){
           ${['q1','q2','q3','q4'].map(q=>{
             const rw=state.randomWinners[q],sw=winners[q];
             return`<tr><td>🎲 ${ql[q]} Random</td><td class="amount">${fmt$(RANDOM_PRIZE)}</td><td>${rw?`<span class="winner-name">🎉 ${rw}</span>`:'<span class="pending">Pending</span>'}</td></tr>
-            <tr><td>${ql[q]} Score</td><td class="amount">${fmt$(pay[q])}</td><td>${sw?`<span class="winner-name">🏆 ${sw.player}</span>`:'<span class="pending">Pending</span>'}</td></tr>`;
+            <tr><td>${ql[q]} Score</td><td class="amount">${fmt$(pay[q])}</td><td>${sw?(sw.player===HOUSE_NAME?'<span class="pending">🏠 House — rolls over</span>':`<span class="winner-name">🏆 ${sw.player}</span>`):'<span class="pending">Pending</span>'}</td></tr>`;
           }).join('')}
         </table>
       </div></div>
@@ -662,12 +711,13 @@ function renderGame(){
     g+=`<div class="num-cell ${state.config.numbersAssigned?'assigned':''}">${rn}</div>`;
     for(let c=0;c<10;c++){
       const k=`r${r}c${c}`,o=state.squares[k];
-      const isY=o===player,isW=winCells.has(k);
+      const isY=o===player,isW=winCells.has(k),isH=o===HOUSE_NAME;
       let cls='grid-cell';
-      if(isW)cls+=' winner';else if(isY)cls+=' yours';else if(o)cls+=' claimed';else if(atLimit||gridLocked)cls+=' maxed';
+      if(isW)cls+=' winner';else if(isH)cls+=' house';else if(isY)cls+=' yours';else if(o)cls+=' claimed';else if(atLimit||gridLocked)cls+=' maxed';
       const clickable=!o&&!atLimit&&!gridLocked;
       const cl=clickable?`onclick="claimSquare(${r},${c})"`:'';
-      g+=`<div class="${cls}" ${cl} title="${o||(gridLocked?'Locked':atLimit?'At limit':'Open')}">${o||''}</div>`;
+      const label=isH?'🏠':o||'';
+      g+=`<div class="${cls}" ${cl} title="${o||(gridLocked?'Locked':atLimit?'At limit':'Open')}">${label}</div>`;
     }
   }
 
@@ -713,6 +763,7 @@ function renderGame(){
       <div class="legend-item"><div class="legend-swatch swatch-yours"></div>Yours</div>
       <div class="legend-item"><div class="legend-swatch swatch-claimed"></div>Claimed</div>
       <div class="legend-item"><div class="legend-swatch swatch-winner"></div>Winner</div>
+      <div class="legend-item"><div class="legend-swatch swatch-house"></div>House</div>
     </div>
 
     <div class="chat-section">
@@ -759,8 +810,14 @@ function renderGame(){
         ${hasMoney?`<p class="admin-msg">Pot: ${fmt$(pay.totalPot)} → Draws: ${fmt$(pay.randomTotal)} | Q1-3: ${fmt$(pay.q1)} ea | Q4: ${fmt$(pay.q4)}</p>`:''}
 
         <hr class="admin-divider">
-        <h3>🎯 Square Limits</h3>
+        <h3>🎯 Square Limits & House</h3>
         <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
+        ${splitInfo?`<p class="admin-msg" style="margin-top:6px">${splitInfo.total} players × ${splitInfo.perPlayer} squares = ${splitInfo.perPlayer*splitInfo.total}${splitInfo.remainder>0?` → <strong style="color:#A78BFA">${splitInfo.remainder} leftover → House squares</strong>`:' ✅ divides evenly'}</p>`:''}
+        <div class="admin-row" style="margin-top:8px">
+          <button class="btn-admin btn-primary" onclick="fillHouseSquares()" style="background:#7C3AED">🏠 Fill Empty as House</button>
+          ${houseCount>0?`<button class="btn-admin btn-danger" onclick="clearHouseSquares()">Clear ${houseCount} House</button>`:''}
+        </div>
+        ${houseCount>0?'<p class="admin-msg">🏠 If a House square wins, prize rolls back into the pot.</p>':''}
 
         <hr class="admin-divider">
         <h3>🎞️ GIPHY</h3>
@@ -864,7 +921,7 @@ function checkNewWinners(){
   var ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
   ['q1','q2','q3','q4'].forEach(function(q){
     var w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed'&&!celebratedWinners['score_'+q]){
+    if(w&&w.player&&w.player!=='Unclaimed'&&w.player!==HOUSE_NAME&&!celebratedWinners['score_'+q]){
       celebratedWinners['score_'+q]=true;
       launchConfetti(q==='q4'?6000:4000);
       setTimeout(function(){showToast('🏆 '+ql[q]+' WINNER: '+w.player+'!','success')},300);
