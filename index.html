@@ -736,37 +736,8 @@ function renderGame(){
     </div>`;
   }
 
-  // Payment tracker — always visible
+  // Payment tracker — admin only now
   let paymentHTML='';
-  {
-    const paidCount=participants.filter(p=>state.payments[p.name]).length;
-    const unpaidCount=participants.length-paidCount;
-    const totalCollected=paidCount*BUYIN;
-    const payRows=participants.map(p=>{
-      const isPaid=state.payments[p.name]||false;
-      const isYou=p.name===player;
-      return`<div class="payment-row">
-        <span class="pay-name" style="${isYou?'color:var(--green)':''}">${escapeHTML(p.name)}</span>
-        ${isAdmin
-          ?`<button class="pay-toggle ${isPaid?'mark-unpaid':'mark-paid'}" onclick="togglePayment('${escapeAttr(p.name)}')">${isPaid?'✅ Paid — undo?':'💰 Mark Paid'}</button>`
-          :`<span class="pay-status ${isPaid?'paid':'unpaid'}">${isPaid?'✅ Paid':'⏳ Unpaid'}</span>`}
-      </div>`;
-    }).join('');
-    paymentHTML=`<div class="payment-section">
-      <div class="collapsible-header ${paymentsOpen?'is-open':''}" onclick="togglePayments()">
-        <h3>💸 Payments (${paidCount}/${participants.length})</h3>
-        <span class="chevron ${paymentsOpen?'open':''}">▼</span>
-      </div>
-      <div class="collapsible-body ${paymentsOpen?'open':''}"><div class="collapsible-inner">
-        <div class="payment-summary">
-          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${paidCount}</span> paid</div>
-          <div class="ps-item"><span class="ps-count" style="color:var(--red)">${unpaidCount}</span> unpaid</div>
-          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${fmt$(totalCollected)}</span> collected</div>
-        </div>
-        <div class="payment-list">${payRows.length?payRows:'<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No players yet</div>'}</div>
-      </div></div>
-    </div>`;
-  }
 
   // Participants
   let partsHTML=`<div class="participants-section">
@@ -830,7 +801,6 @@ function renderGame(){
     ${lockBanner}
     ${rules}
     ${venmoHTML}
-    ${paymentHTML}
     ${partsHTML}
     <div class="grid-section">
       <div class="grid-wrapper">
@@ -897,6 +867,20 @@ function renderGame(){
         <div class="admin-row"><button class="btn-admin btn-primary" onclick="saveGameSettings()">Save</button></div>
         ${hasMoney?`<p class="admin-msg">Pot: ${fmt$(pay.totalPot)} → Draws: ${fmt$(pay.randomTotal)} | Q1-3: ${fmt$(pay.q1)} ea | Q4: ${fmt$(pay.q4)}</p>`:''}
 
+        <hr class="admin-divider">
+        <h3>💸 Payments (${participants.filter(p=>state.payments[p.name]).length}/${participants.length})</h3>
+        <div class="payment-summary" style="margin-bottom:8px">
+          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${participants.filter(p=>state.payments[p.name]).length}</span> paid</div>
+          <div class="ps-item"><span class="ps-count" style="color:var(--red)">${participants.length-participants.filter(p=>state.payments[p.name]).length}</span> unpaid</div>
+          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${fmt$(participants.filter(p=>state.payments[p.name]).length*BUYIN)}</span> collected</div>
+        </div>
+        ${participants.length?`<div class="payment-list">${participants.map(p=>{
+          const isPaid=state.payments[p.name]||false;
+          return`<div class="payment-row">
+            <span class="pay-name">${escapeHTML(p.name)}</span>
+            <button class="pay-toggle ${isPaid?'mark-unpaid':'mark-paid'}" onclick="togglePayment('${escapeAttr(p.name)}')">${isPaid?'✅ Paid — undo?':'💰 Mark Paid'}</button>
+          </div>`;}).join('')}</div>`
+        :'<p class="admin-msg">No players yet</p>'}
         <hr class="admin-divider">
         <h3>🎯 Square Limits & House</h3>
         <div class="admin-row"><label>Max/player:</label><input type="number" id="edit_max_per_player" value="${max||''}" min="0" max="100" placeholder="0"><button class="btn-admin btn-primary" onclick="saveMaxPerPlayer()">Save</button></div>
