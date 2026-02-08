@@ -305,7 +305,7 @@ let adminOpen = false;
 let rulesOpen = true;
 let chatOpen = true;
 let participantsOpen = true;
-let paymentsOpen = false;
+let paymentsOpen = true;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
@@ -720,28 +720,28 @@ function renderGame(){
     </div></div>
   </div>`;
 
-  // Venmo
+  // Venmo — always visible
   const venmoUser='sean-ball-13';
-  const venmoAmt=state.config.costPerPerson||0;
+  const BUYIN=state.config.costPerPerson||0;
   const venmoNote=encodeURIComponent('Super Bowl Squares 🏈');
-  const venmoURL=`https://venmo.com/u/${venmoUser}${venmoAmt?`?txn=pay&amount=${venmoAmt}&note=${venmoNote}`:''}`;
+  const venmoURL=`https://venmo.com/u/${venmoUser}${BUYIN?`?txn=pay&amount=${BUYIN}&note=${venmoNote}`:''}`;
   let venmoHTML='';
-  if(hasMoney&&player!==ADMIN_NAME){
+  if(BUYIN&&player!==ADMIN_NAME){
     const youPaid=state.payments[player];
     venmoHTML=`<div class="venmo-section">
       ${youPaid?'<div style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px">✅ You\'re paid up!</div>'
       :`<a href="${venmoURL}" target="_blank" class="venmo-btn">
-        <span class="venmo-logo">Ⓥ</span> Pay via Venmo — ${fmt$(venmoAmt)}
+        <span class="venmo-logo">Ⓥ</span> Pay via Venmo — ${fmt$(BUYIN)}
       </a>`}
     </div>`;
   }
 
-  // Payment tracker
+  // Payment tracker — always visible
   let paymentHTML='';
-  if(hasMoney){
+  {
     const paidCount=participants.filter(p=>state.payments[p.name]).length;
     const unpaidCount=participants.length-paidCount;
-    const totalCollected=paidCount*venmoAmt;
+    const totalCollected=paidCount*BUYIN;
     const payRows=participants.map(p=>{
       const isPaid=state.payments[p.name]||false;
       const isYou=p.name===player;
