@@ -302,7 +302,7 @@ function getTeamColor(t){return TEAM_COLORS[t]||null}
 
 let player = localStorage.getItem('sbsq_player') || null;
 let adminOpen = false;
-let rulesOpen = false;
+let rulesOpen = true;
 let chatOpen = true;
 let participantsOpen = true;
 let paymentsOpen = false;
@@ -688,14 +688,20 @@ function renderGame(){
   }
 
   // Rules
-  let rules='';
-  if(hasMoney){
-    rules=`<div class="rules-section">
-      <div class="collapsible-header ${rulesOpen?'is-open':''}" onclick="toggleRules()">
-        <h3>💰 Rules & Payouts</h3>
-        <span class="chevron ${rulesOpen?'open':''}">▼</span>
+  let rules=`<div class="rules-section">
+    <div class="collapsible-header ${rulesOpen?'is-open':''}" onclick="toggleRules()">
+      <h3>📋 Rules & Payouts</h3>
+      <span class="chevron ${rulesOpen?'open':''}">▼</span>
+    </div>
+    <div class="collapsible-body ${rulesOpen?'open':''}"><div class="collapsible-inner">
+      <div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px">
+        <p style="margin-bottom:8px"><strong style="color:var(--text)">How it works:</strong> Each square on the 10×10 grid represents a unique combination of the last digit of each team's score. Claim your squares, then numbers 0–9 are randomly assigned to the rows and columns.</p>
+        <p style="margin-bottom:8px"><strong style="color:var(--text)">Winning:</strong> At the end of each quarter, take the last digit of each team's score — where those two numbers intersect on the grid is the winning square for that quarter.</p>
+        <p style="margin-bottom:8px"><strong style="color:var(--text)">Example:</strong> If ${team1} has 17 and ${team2} has 13 at halftime, the winning square is where <strong style="color:var(--accent)">7</strong> (column) meets <strong style="color:var(--accent)">3</strong> (row).</p>
+        <p><strong style="color:var(--text)">Random draws:</strong> Before each quarter, one random player wins a bonus ${fmt$(RANDOM_PRIZE)} prize — no score needed, just luck!</p>
       </div>
-      <div class="collapsible-body ${rulesOpen?'open':''}"><div class="collapsible-inner">
+      ${hasMoney?`
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
         <div class="rules-grid">
           <span class="rl">Players</span><span class="rv">${state.config.numParticipants}</span>
           <span class="rl">Buy-in</span><span class="rv">${fmt$(state.config.costPerPerson)}</span>
@@ -710,9 +716,9 @@ function renderGame(){
             <tr><td>${ql[q]} Score</td><td class="amount">${fmt$(pay[q])}</td><td>${sw?(sw.player===HOUSE_NAME?'<span class="pending">🏠 House — rolls over</span>':`<span class="winner-name">🏆 ${sw.player}</span>`):'<span class="pending">Pending</span>'}</td></tr>`;
           }).join('')}
         </table>
-      </div></div>
-    </div>`;
-  }
+      `:`<p style="font-size:12px;color:var(--dim);text-align:center;margin-top:4px">💰 Payout details will appear once the admin sets the buy-in.</p>`}
+    </div></div>
+  </div>`;
 
   // Venmo
   const venmoUser='sean-ball-13';
