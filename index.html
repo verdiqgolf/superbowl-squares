@@ -905,32 +905,41 @@ let predictions={};
 function buildPredictionsHTML(team1,team2){
   const myPred=predictions[player]||null;
   const allPreds=Object.entries(predictions);
-  // Check if game has started (any score entered)
   const gameStarted=['q1_t1','q1_t2','q2_t1','q2_t2','q3_t1','q3_t2','q4_t1','q4_t2'].some(k=>state.scores[k]!==null&&state.scores[k]!==undefined);
   const finalScore=state.scores.q4_t1!==null&&state.scores.q4_t2!==null;
+  const t1Color=getTeamColor(team1)||'var(--accent)';
+  const t2Color=getTeamColor(team2)||'var(--red)';
+  const t1Logo=TEAM_LOGOS[team1]?`<img src="${TEAM_LOGOS[team1]}" style="height:14px;width:auto;vertical-align:middle;margin-right:3px">`:'';
+  const t2Logo=TEAM_LOGOS[team2]?`<img src="${TEAM_LOGOS[team2]}" style="height:14px;width:auto;vertical-align:middle;margin-right:3px">`:'';
 
   let predContent='';
   if(!myPred&&!gameStarted){
-    // Show prediction form
     predContent=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
-      <span style="font-size:13px;font-weight:600">${team1}</span>
+      <span style="font-size:13px;font-weight:600;color:${t1Color}">${t1Logo}${team1}</span>
       <input type="number" id="pred_t1" placeholder="0" min="0" max="99" style="width:50px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;text-align:center">
       <span style="font-size:13px;color:var(--dim)">—</span>
       <input type="number" id="pred_t2" placeholder="0" min="0" max="99" style="width:50px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;text-align:center">
-      <span style="font-size:13px;font-weight:600">${team2}</span>
+      <span style="font-size:13px;font-weight:600;color:${t2Color}">${t2Logo}${team2}</span>
       <button class="btn-admin btn-primary" onclick="submitPrediction()">Lock In 🔒</button>
     </div>
     <p style="font-size:11px;color:var(--dim);text-align:center;margin-top:6px">Predict the final score! Locks when game starts.</p>`;
   } else if(myPred){
-    predContent=`<div style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px">Your pick: ${team1} ${myPred.t1} — ${myPred.t2} ${team2}</div>`;
+    predContent=`<div style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px">Your pick: ${t1Logo}${team1} <span style="font-size:15px">${myPred.t1}</span> — <span style="font-size:15px">${myPred.t2}</span> ${t2Logo}${team2}</div>`;
   } else {
     predContent=`<div style="text-align:center;font-size:12px;color:var(--dim);margin-bottom:6px">Predictions are locked (game started)</div>`;
   }
 
-  // Show all predictions
   if(allPreds.length>0){
+    // Table header
+    let tableHead=`<div style="display:grid;grid-template-columns:${finalScore?'24px ':''} 1fr 56px 56px ${finalScore?'70px':''};gap:4px;align-items:center;padding:4px 8px;font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px">
+      ${finalScore?'<span></span>':''}
+      <span>Player</span>
+      <span style="text-align:center;color:${t1Color}">${t1Logo}${team1.slice(0,5)}</span>
+      <span style="text-align:center;color:${t2Color}">${t2Logo}${team2.slice(0,5)}</span>
+      ${finalScore?'<span style="text-align:right">Result</span>':''}
+    </div>`;
+
     let predRows='';
-    // If final score exists, rank by closeness
     if(finalScore){
       const actual_t1=state.scores.q4_t1, actual_t2=state.scores.q4_t2;
       const ranked=allPreds.map(([name,p])=>{
@@ -940,22 +949,30 @@ function buildPredictionsHTML(team1,team2){
       }).sort((a,b)=>a.diff-b.diff);
       predRows=ranked.map((r,i)=>{
         const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-        return`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg3);border-radius:6px;font-size:12px${r.name===player?';border:1px solid rgba(16,185,129,.3)':''}">
-          <span style="min-width:20px">${medal}</span>
-          <span style="font-weight:600;flex:1;${r.name===player?'color:var(--green)':''}">${escapeHTML(r.name)}</span>
-          <span style="color:var(--muted)">${r.p.t1}–${r.p.t2}</span>
-          <span style="color:${r.diff===0?'var(--gold)':r.diff<=7?'var(--green)':'var(--muted)'};font-weight:600;min-width:42px;text-align:right">${r.exact?'🎯 EXACT':'off by '+r.diff}</span>
+        const isYou=r.name===player;
+        return`<div style="display:grid;grid-template-columns:24px 1fr 56px 56px 70px;gap:4px;align-items:center;padding:6px 8px;background:var(--bg3);border-radius:6px;font-size:13px${isYou?';border:1px solid rgba(16,185,129,.3)':''}">
+          <span>${medal}</span>
+          <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${isYou?'color:var(--green)':''}">${escapeHTML(r.name)}</span>
+          <span style="text-align:center;font-weight:700;color:${t1Color}">${r.p.t1}</span>
+          <span style="text-align:center;font-weight:700;color:${t2Color}">${r.p.t2}</span>
+          <span style="text-align:right;font-weight:600;font-size:11px;color:${r.diff===0?'var(--gold)':r.diff<=7?'var(--green)':'var(--muted)'}">${r.exact?'🎯 EXACT':'off by '+r.diff}</span>
         </div>`;
       }).join('');
     } else {
       predRows=allPreds.map(([name,p])=>{
-        return`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg3);border-radius:6px;font-size:12px${name===player?';border:1px solid rgba(16,185,129,.3)':''}">
-          <span style="font-weight:600;flex:1;${name===player?'color:var(--green)':''}">${escapeHTML(name)}</span>
-          <span style="color:var(--muted)">${p.t1}–${p.t2}</span>
+        const isYou=name===player;
+        return`<div style="display:grid;grid-template-columns:1fr 56px 56px;gap:4px;align-items:center;padding:6px 8px;background:var(--bg3);border-radius:6px;font-size:13px${isYou?';border:1px solid rgba(16,185,129,.3)':''}">
+          <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${isYou?'color:var(--green)':''}">${escapeHTML(name)}</span>
+          <span style="text-align:center;font-weight:700;color:${t1Color}">${p.t1}</span>
+          <span style="text-align:center;font-weight:700;color:${t2Color}">${p.t2}</span>
         </div>`;
       }).join('');
     }
-    predContent+=`<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">${predRows}</div>`;
+    predContent+=`<div style="display:flex;flex-direction:column;gap:3px;margin-top:8px">${tableHead}${predRows}</div>`;
+    if(finalScore){
+      const actual_t1=state.scores.q4_t1, actual_t2=state.scores.q4_t2;
+      predContent+=`<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--dim)">Final: <strong style="color:${t1Color}">${team1} ${actual_t1}</strong> — <strong style="color:${t2Color}">${actual_t2} ${team2}</strong></div>`;
+    }
   }
 
   return`<div class="odds-section">
