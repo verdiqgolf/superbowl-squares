@@ -60,6 +60,20 @@ input{font-family:inherit;outline:none}
 .collapsible-inner{padding:14px 16px}
 
 .venmo-section{max-width:600px;margin:8px auto;padding:0 12px}
+.payment-section{max-width:600px;margin:8px auto;padding:0 12px}
+.payment-list{display:flex;flex-direction:column;gap:4px}
+.payment-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:8px;font-size:13px}
+.payment-row .pay-name{font-weight:600}
+.payment-row .pay-status{font-size:12px;font-weight:600}
+.payment-row .pay-status.paid{color:var(--green)}
+.payment-row .pay-status.unpaid{color:var(--red)}
+.payment-row .pay-toggle{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;transition:all .12s}
+.payment-row .pay-toggle:active{transform:scale(.95)}
+.payment-row .pay-toggle.mark-paid{background:var(--green);color:#fff}
+.payment-row .pay-toggle.mark-unpaid{background:var(--bg4);color:var(--muted)}
+.payment-summary{display:flex;gap:12px;justify-content:center;font-size:13px;margin-bottom:8px;flex-wrap:wrap}
+.payment-summary .ps-item{display:flex;align-items:center;gap:4px}
+.payment-summary .ps-count{font-weight:700}
 .venmo-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:#008CFF;color:#fff;font-size:15px;font-weight:700;text-decoration:none;transition:background .15s;border:none;cursor:pointer}
 .venmo-btn:hover{background:#006FCC}
 .venmo-btn:active{transform:scale(.98)}
@@ -206,7 +220,7 @@ input{font-family:inherit;outline:none}
   .header{padding:12px 8px 0}
   .header h1{font-size:26px;letter-spacing:2px}
   .scoreboard{padding:0 8px;margin:10px auto}
-  .rules-section,.participants-section,.chat-section,.admin-section,.lock-banner,.venmo-section{padding:0 8px}
+  .rules-section,.participants-section,.chat-section,.admin-section,.lock-banner,.venmo-section,.payment-section{padding:0 8px}
   .collapsible-header{padding:10px 12px}
   .collapsible-inner{padding:10px 12px}
   .admin-panel{padding:14px}
@@ -291,6 +305,7 @@ let adminOpen = false;
 let rulesOpen = false;
 let chatOpen = true;
 let participantsOpen = true;
+let paymentsOpen = false;
 let chatMessages = [];
 let lastChatCount = 0;
 let unreadCount = 0;
@@ -301,7 +316,8 @@ let state = {
   scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
   squares:{},
   randomWinners:{q1:null,q2:null,q3:null,q4:null},
-  players:{}
+  players:{},
+  payments:{}
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
@@ -339,6 +355,10 @@ function setupListeners(){
   });
   db.ref('game/players').on('value',s=>{
     state.players=s.exists()?s.val():{};
+    render();
+  });
+  db.ref('game/payments').on('value',s=>{
+    state.payments=s.exists()?s.val():{};
     render();
   });
   db.ref('game/chat').orderByChild('ts').limitToLast(150).on('value',s=>{
@@ -463,8 +483,9 @@ function resetGame(){
   db.ref('game').set({
     config:{team1:state.config.team1,team2:state.config.team2,numbersAssigned:false,colNumbers:null,rowNumbers:null,maxPerPlayer:state.config.maxPerPlayer,numParticipants:state.config.numParticipants,costPerPerson:state.config.costPerPerson,gameLocked:true,giphyKey:state.config.giphyKey},
     scores:{q1_t1:null,q1_t2:null,q2_t1:null,q2_t2:null,q3_t1:null,q3_t2:null,q4_t1:null,q4_t2:null},
-    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,chat:null
+    squares:{},randomWinners:{q1:null,q2:null,q3:null,q4:null},players:null,payments:null,chat:null
   });
+  localStorage.removeItem('sbsq_celebrated');
   showToast('Game reset!','success');
 }
 
@@ -509,6 +530,11 @@ function getEvenSplitInfo(){
   const perPlayer=Math.floor(100/n);
   const remainder=100-(perPlayer*n);
   return{perPlayer,remainder,total:n};
+}
+
+function togglePayment(name){
+  const current=state.payments[name]||false;
+  db.ref('game/payments/'+name).set(!current);
 }
 
 function getWinner(q){
@@ -613,7 +639,7 @@ function renderSignIn(){
     <span class="emoji-football">🏈</span>
     <h1>SUPER BOWL SQUARES</h1>
     <p class="subtitle">Enter your name to join</p>
-    <input type="text" id="playerName" placeholder="Your name" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
+    <input type="text" id="playerName" placeholder="Your name (e.g. Mike B)" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
     <button class="btn-join" onclick="joinGame()">Join Game</button>
   </div></div>`;
 }
@@ -695,10 +721,44 @@ function renderGame(){
   const venmoURL=`https://venmo.com/u/${venmoUser}${venmoAmt?`?txn=pay&amount=${venmoAmt}&note=${venmoNote}`:''}`;
   let venmoHTML='';
   if(hasMoney&&player!==ADMIN_NAME){
+    const youPaid=state.payments[player];
     venmoHTML=`<div class="venmo-section">
-      <a href="${venmoURL}" target="_blank" class="venmo-btn">
+      ${youPaid?'<div style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px">✅ You\'re paid up!</div>'
+      :`<a href="${venmoURL}" target="_blank" class="venmo-btn">
         <span class="venmo-logo">Ⓥ</span> Pay via Venmo — ${fmt$(venmoAmt)}
-      </a>
+      </a>`}
+    </div>`;
+  }
+
+  // Payment tracker
+  let paymentHTML='';
+  if(hasMoney){
+    const paidCount=participants.filter(p=>state.payments[p.name]).length;
+    const unpaidCount=participants.length-paidCount;
+    const totalCollected=paidCount*venmoAmt;
+    const payRows=participants.map(p=>{
+      const isPaid=state.payments[p.name]||false;
+      const isYou=p.name===player;
+      return`<div class="payment-row">
+        <span class="pay-name" style="${isYou?'color:var(--green)':''}">${escapeHTML(p.name)}</span>
+        ${isAdmin
+          ?`<button class="pay-toggle ${isPaid?'mark-unpaid':'mark-paid'}" onclick="togglePayment('${escapeAttr(p.name)}')">${isPaid?'✅ Paid — undo?':'💰 Mark Paid'}</button>`
+          :`<span class="pay-status ${isPaid?'paid':'unpaid'}">${isPaid?'✅ Paid':'⏳ Unpaid'}</span>`}
+      </div>`;
+    }).join('');
+    paymentHTML=`<div class="payment-section">
+      <div class="collapsible-header ${paymentsOpen?'is-open':''}" onclick="togglePayments()">
+        <h3>💸 Payments (${paidCount}/${participants.length})</h3>
+        <span class="chevron ${paymentsOpen?'open':''}">▼</span>
+      </div>
+      <div class="collapsible-body ${paymentsOpen?'open':''}"><div class="collapsible-inner">
+        <div class="payment-summary">
+          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${paidCount}</span> paid</div>
+          <div class="ps-item"><span class="ps-count" style="color:var(--red)">${unpaidCount}</span> unpaid</div>
+          <div class="ps-item"><span class="ps-count" style="color:var(--green)">${fmt$(totalCollected)}</span> collected</div>
+        </div>
+        <div class="payment-list">${payRows.length?payRows:'<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No players yet</div>'}</div>
+      </div></div>
     </div>`;
   }
 
@@ -710,11 +770,12 @@ function renderGame(){
     </div>
     <div class="collapsible-body ${participantsOpen?'open':''}"><div class="collapsible-inner">
       ${participants.length===0?'<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">No players yet</div>'
-      :`<div class="participants-list">${participants.map(p=>
-        `<div class="participant-chip ${p.name===player?'is-you':''}">
-          <span class="p-name">${escapeHTML(p.name)}</span>
+      :`<div class="participants-list">${participants.map(p=>{
+        const pPaid=state.payments[p.name]?'✅':'';
+        return`<div class="participant-chip ${p.name===player?'is-you':''}">
+          <span class="p-name">${pPaid} ${escapeHTML(p.name)}</span>
           <span class="p-count">${p.count?p.count+' sq':'joined'}</span>
-        </div>`).join('')}</div>`}
+        </div>`;}).join('')}</div>`}
     </div></div>
   </div>`;
 
@@ -763,6 +824,7 @@ function renderGame(){
     ${lockBanner}
     ${rules}
     ${venmoHTML}
+    ${paymentHTML}
     ${partsHTML}
     <div class="grid-section">
       <div class="grid-wrapper">
@@ -872,14 +934,31 @@ function renderGame(){
 
 function joinGame(){
   const i=document.getElementById('playerName'),n=i.value.trim();
-  if(!n)return;player=n;localStorage.setItem('sbsq_player',player);registerPlayer();render();
+  if(!n)return;
+  if(/[.#$\[\]\/]/.test(n)){showToast('Name can\'t contain . # $ [ ] /','error',3000);return}
+  db.ref('game/players/'+n).once('value',function(s){
+    if(s.exists()){
+      const prev=localStorage.getItem('sbsq_player');
+      if(prev===n){
+        player=n;localStorage.setItem('sbsq_player',player);registerPlayer();render();
+        return;
+      }
+      if(confirm('"'+n+'" is already in the game.\n\nIs this you rejoining? (If not, add a last initial like "'+n+' B")')){
+        player=n;localStorage.setItem('sbsq_player',player);render();
+        return;
+      }
+      return;
+    }
+    player=n;localStorage.setItem('sbsq_player',player);registerPlayer();render();
+  });
 }
 function toggleAdmin(){adminOpen=!adminOpen;render()}
 function toggleRules(){rulesOpen=!rulesOpen;render()}
 function toggleParticipants(){participantsOpen=!participantsOpen;render()}
+function togglePayments(){paymentsOpen=!paymentsOpen;render()}
 function toggleChat(){chatOpen=!chatOpen;if(chatOpen)unreadCount=0;render()}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
-function showToast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2500)}
+function showToast(m,t,dur){const e=document.getElementById('toast');e.textContent=m;e.className=`toast ${t||''} show`;setTimeout(()=>e.className='toast',dur||2500)}
 
 // ── Confetti ──
 const confettiCanvas=document.getElementById('confettiCanvas');
@@ -932,24 +1011,31 @@ function tickConfetti(){
   else{confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);confettiRunning=false}
 }
 
-// Track celebrated winners so we don't repeat or fire on page load
-var celebratedWinners={};
-var confettiReady=false;
+// Track celebrated winners in localStorage so users see confetti once per win, even on reload
+function getCelebrated(){
+  try{return JSON.parse(localStorage.getItem('sbsq_celebrated')||'{}');}catch(e){return{}}
+}
+function setCelebrated(key){
+  var c=getCelebrated();c[key]=true;
+  localStorage.setItem('sbsq_celebrated',JSON.stringify(c));
+}
+function hasCelebrated(key){return!!getCelebrated()[key]}
 
 function checkNewWinners(){
-  if(!confettiReady)return;
+  if(!player)return;
   var ql={q1:'Q1',q2:'Q2',q3:'Q3',q4:'FINAL'};
   ['q1','q2','q3','q4'].forEach(function(q){
     var w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed'&&w.player!==HOUSE_NAME&&!celebratedWinners['score_'+q]){
-      celebratedWinners['score_'+q]=true;
+    if(w&&w.player&&w.player!=='Unclaimed'&&w.player!==HOUSE_NAME&&!hasCelebrated('score_'+q)){
+      setCelebrated('score_'+q);
       launchConfetti(q==='q4'?6000:4000);
-      setTimeout(function(){showToast('🏆 '+ql[q]+' WINNER: '+w.player+'!','success')},300);
+      setTimeout(function(){showToast('🎉 Congrats to '+w.player+' on winning '+ql[q]+'!','success',5000)},300);
     }
     var rw=state.randomWinners[q];
-    if(rw&&!celebratedWinners['draw_'+q]){
-      celebratedWinners['draw_'+q]=true;
+    if(rw&&!hasCelebrated('draw_'+q)){
+      setCelebrated('draw_'+q);
       launchConfetti(4000);
+      setTimeout(function(){showToast('🎉 Congrats to '+rw+' on winning the '+ql[q]+' random draw!','success',5000)},600);
     }
   });
 }
@@ -971,15 +1057,8 @@ initGame();setupListeners();
 if(player)registerPlayer();
 render();
 
-// After first data loads, snapshot existing winners so confetti only fires for NEW ones
-setTimeout(function(){
-  ['q1','q2','q3','q4'].forEach(function(q){
-    var w=getWinner(q);
-    if(w&&w.player&&w.player!=='Unclaimed')celebratedWinners['score_'+q]=true;
-    if(state.randomWinners[q])celebratedWinners['draw_'+q]=true;
-  });
-  confettiReady=true;
-},3000);
+// Check for any wins the user hasn't seen yet (slight delay for Firebase data to load)
+setTimeout(checkNewWinners,2000);
 </script>
 </body>
 </html>
