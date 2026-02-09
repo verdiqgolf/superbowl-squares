@@ -790,6 +790,22 @@ function togglePayment(name){
   db.ref('game/payments/'+name).set(!current);
 }
 
+function removePlayer(name){
+  const sqCount=Object.values(state.squares).filter(v=>v===name).length;
+  if(!confirm(`Remove "${name}"?\n\n• ${sqCount} square${sqCount!==1?'s':''} will be freed\n• Payment, team pick, prediction cleared\n\nThis can't be undone.`))return;
+  // Remove their squares
+  const updates={};
+  Object.entries(state.squares).forEach(([k,v])=>{if(v===name)updates['game/squares/'+k]=null});
+  // Remove from all data
+  updates['game/players/'+name]=null;
+  updates['game/payments/'+name]=null;
+  updates['game/teamPicks/'+name]=null;
+  updates['game/predictions/'+name]=null;
+  updates['game/presence/'+name]=null;
+  db.ref().update(updates);
+  showToast(`Removed ${name} (${sqCount} squares freed)`,'success');
+}
+
 function pickTeam(team){
   if(!player)return;
   const current=state.teamPicks[player];
@@ -1162,9 +1178,9 @@ function renderGame(){
     </div>`;
   });
 
-  // Lock banner
+  // Lock banner — only during initial setup, not after relocking mid-game
   let lockBanner='';
-  if(locked&&!isAdmin){
+  if(locked&&!isAdmin&&claimed===0){
     lockBanner=`<div class="lock-banner"><div class="lock-banner-inner">
       <div class="lock-icon">🔒</div>
       <div class="lock-title">GAME NOT YET OPEN</div>
@@ -1387,6 +1403,7 @@ function renderGame(){
           return`<div class="payment-row">
             <span class="pay-name">${escapeHTML(p.name)}</span>
             <button class="pay-toggle ${isPaid?'mark-unpaid':'mark-paid'}" onclick="togglePayment('${escapeAttr(p.name)}')">${isPaid?'✅ Paid — undo?':'💰 Mark Paid'}</button>
+            <button class="btn-admin btn-danger" onclick="removePlayer('${escapeAttr(p.name)}')" style="padding:4px 8px;font-size:11px" title="Remove player">🗑️</button>
           </div>`;}).join('')}</div>`
         :'<p class="admin-msg">No players yet</p>'}
         <hr class="admin-divider">
