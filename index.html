@@ -518,7 +518,7 @@ function buildCountdownContent(){
   const kickoffDiff=KICKOFF_TIME-now;
   const gridDiff=GRID_OPEN_TIME-now;
   if(kickoffDiff<=0){
-    return`<div class="cd-live">🏈 GAME TIME — REALLY PATS?! 🏈</div>`;
+    return`<div class="cd-live">🏈 REALLY PATS?! 🏈</div>`;
   }
   const h=Math.floor(kickoffDiff/3600000);
   const m=Math.floor((kickoffDiff%3600000)/60000);
